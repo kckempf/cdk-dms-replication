@@ -223,7 +223,7 @@ const pipeline = new DmsMigrationPipeline(this, 'MigrationPipeline', {
     password: cdk.SecretValue.secretsManager('aurora-dms-secret'),
     databaseName: 'mydb',
   },
-  tableMappings: new TableMappings().includeSchema('public').build(),
+  tableMappings: new TableMappings().includeSchema('public').toJson(),
 });
 ```
 
@@ -350,6 +350,7 @@ Any object.
 | <code><a href="#cdk-dms-replication.DmsMigrationPipeline.property.source">source</a></code> | <code><a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a></code> | The source endpoint used by this pipeline. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipeline.property.target">target</a></code> | <code><a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a></code> | The target endpoint used by this pipeline. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipeline.property.dmsCloudWatchRole">dmsCloudWatchRole</a></code> | <code>aws-cdk-lib.aws_iam.Role</code> | IAM role that allows DMS to write to CloudWatch Logs. |
+| <code><a href="#cdk-dms-replication.DmsMigrationPipeline.property.dmsVpcRole">dmsVpcRole</a></code> | <code>aws-cdk-lib.aws_iam.Role</code> | IAM role that allows DMS to manage VPC resources (dms-vpc-role). |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipeline.property.logGroup">logGroup</a></code> | <code>aws-cdk-lib.aws_logs.LogGroup</code> | CloudWatch log group for the task (if enableCloudWatchLogs is true). |
 
 ---
@@ -423,6 +424,22 @@ public readonly dmsCloudWatchRole: Role;
 - *Type:* aws-cdk-lib.aws_iam.Role
 
 IAM role that allows DMS to write to CloudWatch Logs.
+
+`undefined` when `createDmsServiceRoles` is `false`.
+
+---
+
+##### `dmsVpcRole`<sup>Optional</sup> <a name="dmsVpcRole" id="cdk-dms-replication.DmsMigrationPipeline.property.dmsVpcRole"></a>
+
+```typescript
+public readonly dmsVpcRole: Role;
+```
+
+- *Type:* aws-cdk-lib.aws_iam.Role
+
+IAM role that allows DMS to manage VPC resources (dms-vpc-role).
+
+`undefined` when `createDmsServiceRoles` is `false`.
 
 ---
 
@@ -829,6 +846,317 @@ public readonly replicationTaskArn: string;
 - *Type:* string
 
 ARN of the replication task.
+
+---
+
+
+### DmsServerlessPipeline <a name="DmsServerlessPipeline" id="cdk-dms-replication.DmsServerlessPipeline"></a>
+
+An L3 CDK pattern construct that provisions a DMS Serverless replication pipeline:.
+
+**Replication config** — backed by `CfnReplicationConfig`; DMS auto-scales
+  capacity between `minCapacityUnits` and `maxCapacityUnits`.
+- **Source endpoint** — supports every engine DMS supports.
+- **Target endpoint** — supports every engine DMS supports.
+- **Subnet group** — private subnet placement.
+- **KMS key** — storage encryption at rest (created if not provided).
+- **Security group** — dedicated group (created if not provided).
+- **IAM roles** — `dms-vpc-role` and `dms-cloudwatch-logs-role`.
+- **CloudWatch log group** — (optional) retains replication logs.
+
+> **CDC start/stop position limitation**: `CfnReplicationConfig` does not
+> expose `cdcStartTime` / `cdcStartPosition` / `cdcStopPosition`. To start
+> from a specific position, call the `StartReplication` API directly after
+> the config is created (e.g. from a Lambda custom resource or CLI).
+
+*Example*
+
+```typescript
+const pipeline = new DmsServerlessPipeline(this, 'ServerlessPipeline', {
+  vpc,
+  maxCapacityUnits: 8,
+  migrationType: MigrationType.FULL_LOAD_AND_CDC,
+  sourceEndpoint: {
+    engine: EndpointEngine.MYSQL,
+    serverName: 'mysql.example.com',
+    port: 3306,
+    username: 'dms_user',
+    password: cdk.SecretValue.secretsManager('mysql-dms-secret'),
+  },
+  targetEndpoint: {
+    engine: EndpointEngine.AURORA_POSTGRESQL,
+    serverName: cluster.clusterEndpoint.hostname,
+    port: 5432,
+    username: 'dms_user',
+    password: cdk.SecretValue.secretsManager('aurora-dms-secret'),
+  },
+});
+```
+
+
+#### Initializers <a name="Initializers" id="cdk-dms-replication.DmsServerlessPipeline.Initializer"></a>
+
+```typescript
+import { DmsServerlessPipeline } from 'cdk-dms-replication'
+
+new DmsServerlessPipeline(scope: Construct, id: string, props: DmsServerlessPipelineProps)
+```
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.Initializer.parameter.scope">scope</a></code> | <code>constructs.Construct</code> | *No description.* |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.Initializer.parameter.id">id</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.Initializer.parameter.props">props</a></code> | <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps">DmsServerlessPipelineProps</a></code> | *No description.* |
+
+---
+
+##### `scope`<sup>Required</sup> <a name="scope" id="cdk-dms-replication.DmsServerlessPipeline.Initializer.parameter.scope"></a>
+
+- *Type:* constructs.Construct
+
+---
+
+##### `id`<sup>Required</sup> <a name="id" id="cdk-dms-replication.DmsServerlessPipeline.Initializer.parameter.id"></a>
+
+- *Type:* string
+
+---
+
+##### `props`<sup>Required</sup> <a name="props" id="cdk-dms-replication.DmsServerlessPipeline.Initializer.parameter.props"></a>
+
+- *Type:* <a href="#cdk-dms-replication.DmsServerlessPipelineProps">DmsServerlessPipelineProps</a>
+
+---
+
+#### Methods <a name="Methods" id="Methods"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.toString">toString</a></code> | Returns a string representation of this construct. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.with">with</a></code> | Applies one or more mixins to this construct. |
+
+---
+
+##### `toString` <a name="toString" id="cdk-dms-replication.DmsServerlessPipeline.toString"></a>
+
+```typescript
+public toString(): string
+```
+
+Returns a string representation of this construct.
+
+##### `with` <a name="with" id="cdk-dms-replication.DmsServerlessPipeline.with"></a>
+
+```typescript
+public with(mixins: ...IMixin[]): IConstruct
+```
+
+Applies one or more mixins to this construct.
+
+Mixins are applied in order. The list of constructs is captured at the
+start of the call, so constructs added by a mixin will not be visited.
+Use multiple `with()` calls if subsequent mixins should apply to added
+constructs.
+
+###### `mixins`<sup>Required</sup> <a name="mixins" id="cdk-dms-replication.DmsServerlessPipeline.with.parameter.mixins"></a>
+
+- *Type:* ...constructs.IMixin[]
+
+The mixins to apply.
+
+---
+
+#### Static Functions <a name="Static Functions" id="Static Functions"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.isConstruct">isConstruct</a></code> | Checks if `x` is a construct. |
+
+---
+
+##### `isConstruct` <a name="isConstruct" id="cdk-dms-replication.DmsServerlessPipeline.isConstruct"></a>
+
+```typescript
+import { DmsServerlessPipeline } from 'cdk-dms-replication'
+
+DmsServerlessPipeline.isConstruct(x: any)
+```
+
+Checks if `x` is a construct.
+
+Use this method instead of `instanceof` to properly detect `Construct`
+instances, even when the construct library is symlinked.
+
+Explanation: in JavaScript, multiple copies of the `constructs` library on
+disk are seen as independent, completely different libraries. As a
+consequence, the class `Construct` in each copy of the `constructs` library
+is seen as a different class, and an instance of one class will not test as
+`instanceof` the other class. `npm install` will not create installations
+like this, but users may manually symlink construct libraries together or
+use a monorepo tool: in those cases, multiple copies of the `constructs`
+library can be accidentally installed, and `instanceof` will behave
+unpredictably. It is safest to avoid using `instanceof`, and using
+this type-testing method instead.
+
+###### `x`<sup>Required</sup> <a name="x" id="cdk-dms-replication.DmsServerlessPipeline.isConstruct.parameter.x"></a>
+
+- *Type:* any
+
+Any object.
+
+---
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.node">node</a></code> | <code>constructs.Node</code> | The tree node. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.cfnReplicationConfig">cfnReplicationConfig</a></code> | <code>aws-cdk-lib.aws_dms.CfnReplicationConfig</code> | The underlying `CfnReplicationConfig` resource. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.encryptionKey">encryptionKey</a></code> | <code>aws-cdk-lib.aws_kms.IKey</code> | The KMS key used for storage encryption. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.replicationConfigArn">replicationConfigArn</a></code> | <code>string</code> | The ARN of the replication config. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.securityGroup">securityGroup</a></code> | <code>aws-cdk-lib.aws_ec2.ISecurityGroup</code> | The security group attached to this pipeline. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.source">source</a></code> | <code><a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a></code> | The source endpoint used by this pipeline. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.subnetGroup">subnetGroup</a></code> | <code>aws-cdk-lib.aws_dms.CfnReplicationSubnetGroup</code> | The replication subnet group created for this pipeline. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.target">target</a></code> | <code><a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a></code> | The target endpoint used by this pipeline. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.dmsCloudWatchRole">dmsCloudWatchRole</a></code> | <code>aws-cdk-lib.aws_iam.Role</code> | IAM role that allows DMS to write to CloudWatch Logs. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.dmsVpcRole">dmsVpcRole</a></code> | <code>aws-cdk-lib.aws_iam.Role</code> | IAM role that allows DMS to manage VPC resources (dms-vpc-role). |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.logGroup">logGroup</a></code> | <code>aws-cdk-lib.aws_logs.LogGroup</code> | CloudWatch log group for the replication config (if enableCloudWatchLogs is true). |
+
+---
+
+##### `node`<sup>Required</sup> <a name="node" id="cdk-dms-replication.DmsServerlessPipeline.property.node"></a>
+
+```typescript
+public readonly node: Node;
+```
+
+- *Type:* constructs.Node
+
+The tree node.
+
+---
+
+##### `cfnReplicationConfig`<sup>Required</sup> <a name="cfnReplicationConfig" id="cdk-dms-replication.DmsServerlessPipeline.property.cfnReplicationConfig"></a>
+
+```typescript
+public readonly cfnReplicationConfig: CfnReplicationConfig;
+```
+
+- *Type:* aws-cdk-lib.aws_dms.CfnReplicationConfig
+
+The underlying `CfnReplicationConfig` resource.
+
+---
+
+##### `encryptionKey`<sup>Required</sup> <a name="encryptionKey" id="cdk-dms-replication.DmsServerlessPipeline.property.encryptionKey"></a>
+
+```typescript
+public readonly encryptionKey: IKey;
+```
+
+- *Type:* aws-cdk-lib.aws_kms.IKey
+
+The KMS key used for storage encryption.
+
+---
+
+##### `replicationConfigArn`<sup>Required</sup> <a name="replicationConfigArn" id="cdk-dms-replication.DmsServerlessPipeline.property.replicationConfigArn"></a>
+
+```typescript
+public readonly replicationConfigArn: string;
+```
+
+- *Type:* string
+
+The ARN of the replication config.
+
+---
+
+##### `securityGroup`<sup>Required</sup> <a name="securityGroup" id="cdk-dms-replication.DmsServerlessPipeline.property.securityGroup"></a>
+
+```typescript
+public readonly securityGroup: ISecurityGroup;
+```
+
+- *Type:* aws-cdk-lib.aws_ec2.ISecurityGroup
+
+The security group attached to this pipeline.
+
+---
+
+##### `source`<sup>Required</sup> <a name="source" id="cdk-dms-replication.DmsServerlessPipeline.property.source"></a>
+
+```typescript
+public readonly source: IDmsEndpoint;
+```
+
+- *Type:* <a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a>
+
+The source endpoint used by this pipeline.
+
+---
+
+##### `subnetGroup`<sup>Required</sup> <a name="subnetGroup" id="cdk-dms-replication.DmsServerlessPipeline.property.subnetGroup"></a>
+
+```typescript
+public readonly subnetGroup: CfnReplicationSubnetGroup;
+```
+
+- *Type:* aws-cdk-lib.aws_dms.CfnReplicationSubnetGroup
+
+The replication subnet group created for this pipeline.
+
+---
+
+##### `target`<sup>Required</sup> <a name="target" id="cdk-dms-replication.DmsServerlessPipeline.property.target"></a>
+
+```typescript
+public readonly target: IDmsEndpoint;
+```
+
+- *Type:* <a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a>
+
+The target endpoint used by this pipeline.
+
+---
+
+##### `dmsCloudWatchRole`<sup>Optional</sup> <a name="dmsCloudWatchRole" id="cdk-dms-replication.DmsServerlessPipeline.property.dmsCloudWatchRole"></a>
+
+```typescript
+public readonly dmsCloudWatchRole: Role;
+```
+
+- *Type:* aws-cdk-lib.aws_iam.Role
+
+IAM role that allows DMS to write to CloudWatch Logs.
+
+`undefined` when `createDmsServiceRoles` is `false`.
+
+---
+
+##### `dmsVpcRole`<sup>Optional</sup> <a name="dmsVpcRole" id="cdk-dms-replication.DmsServerlessPipeline.property.dmsVpcRole"></a>
+
+```typescript
+public readonly dmsVpcRole: Role;
+```
+
+- *Type:* aws-cdk-lib.aws_iam.Role
+
+IAM role that allows DMS to manage VPC resources (dms-vpc-role).
+
+`undefined` when `createDmsServiceRoles` is `false`.
+
+---
+
+##### `logGroup`<sup>Optional</sup> <a name="logGroup" id="cdk-dms-replication.DmsServerlessPipeline.property.logGroup"></a>
+
+```typescript
+public readonly logGroup: LogGroup;
+```
+
+- *Type:* aws-cdk-lib.aws_logs.LogGroup
+
+CloudWatch log group for the replication config (if enableCloudWatchLogs is true).
 
 ---
 
@@ -1392,8 +1720,6 @@ public readonly password: SecretValue;
 
 Database password.
 
-Used when not using Secrets Manager.
-
 ---
 
 ##### `port`<sup>Optional</sup> <a name="port" id="cdk-dms-replication.DmsEndpointProps.property.port"></a>
@@ -1554,6 +1880,7 @@ const dmsMigrationPipelineProps: DmsMigrationPipelineProps = { ... }
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.cdcStartPosition">cdcStartPosition</a></code> | <code>string</code> | CDC start position (LSN or equivalent). |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.cdcStartTime">cdcStartTime</a></code> | <code>string</code> | CDC start time (ISO-8601 string or Unix epoch seconds). |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.cdcStopPosition">cdcStopPosition</a></code> | <code>string</code> | CDC stop position. |
+| <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.createDmsServiceRoles">createDmsServiceRoles</a></code> | <code>boolean</code> | Whether to create the two account-level DMS service roles (`dms-vpc-role` and `dms-cloudwatch-logs-role`) required by DMS. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.enableCloudWatchLogs">enableCloudWatchLogs</a></code> | <code>boolean</code> | Whether to create a CloudWatch log group for the task. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.encryptionKey">encryptionKey</a></code> | <code>aws-cdk-lib.aws_kms.IKey</code> | KMS key for encrypting the replication instance storage at rest. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.engineVersion">engineVersion</a></code> | <code>string</code> | Engine version for the replication instance. |
@@ -1652,6 +1979,28 @@ Only used when migrationType includes CDC.
 
 ---
 
+##### `createDmsServiceRoles`<sup>Optional</sup> <a name="createDmsServiceRoles" id="cdk-dms-replication.DmsMigrationPipelineProps.property.createDmsServiceRoles"></a>
+
+```typescript
+public readonly createDmsServiceRoles: boolean;
+```
+
+- *Type:* boolean
+- *Default:* true
+
+Whether to create the two account-level DMS service roles (`dms-vpc-role` and `dms-cloudwatch-logs-role`) required by DMS.
+
+Set this to `false` if the roles already exist in the AWS account — for
+example, because another CDK stack (or a manual deployment) already
+created them. Attempting to create roles with the same name twice in the
+same account causes a CloudFormation `EntityAlreadyExists` error.
+
+When `false`, the construct expects the roles to already be present and
+skips creating them. The `dmsVpcRole` and `dmsCloudWatchRole` properties
+will be `undefined`.
+
+---
+
 ##### `enableCloudWatchLogs`<sup>Optional</sup> <a name="enableCloudWatchLogs" id="cdk-dms-replication.DmsMigrationPipelineProps.property.enableCloudWatchLogs"></a>
 
 ```typescript
@@ -1686,7 +2035,7 @@ public readonly engineVersion: string;
 ```
 
 - *Type:* string
-- *Default:* "3.5.3"
+- *Default:* latest version available in the region (chosen by DMS)
 
 Engine version for the replication instance.
 
@@ -1766,7 +2115,7 @@ public readonly replicationInstanceClass: ReplicationInstanceClass;
 ```
 
 - *Type:* <a href="#cdk-dms-replication.ReplicationInstanceClass">ReplicationInstanceClass</a>
-- *Default:* ReplicationInstanceClass.R5_LARGE
+- *Default:* ReplicationInstanceClass.R6I_LARGE
 
 Replication instance class.
 
@@ -1922,7 +2271,7 @@ public readonly engineVersion: string;
 ```
 
 - *Type:* string
-- *Default:* "3.5.3"
+- *Default:* latest version available in the region (chosen by DMS)
 
 Replication engine version.
 
@@ -2002,7 +2351,7 @@ public readonly replicationInstanceClass: ReplicationInstanceClass;
 ```
 
 - *Type:* <a href="#cdk-dms-replication.ReplicationInstanceClass">ReplicationInstanceClass</a>
-- *Default:* ReplicationInstanceClass.R5_LARGE
+- *Default:* ReplicationInstanceClass.R6I_LARGE
 
 Instance class for the replication instance.
 
@@ -2135,7 +2484,7 @@ Use {@link TableMappings} to build this, or provide a raw JSON string.
 *Example*
 
 ```typescript
-tableMappings: new TableMappings().includeSchema('public').build()
+tableMappings: new TableMappings().includeSchema('public').toJson()
 ```
 
 
@@ -2247,6 +2596,320 @@ Task settings JSON string.
 
 Use {@link TaskSettings} to build this, or provide a raw JSON string.
 A sensible default is applied if not provided.
+
+---
+
+### DmsServerlessPipelineProps <a name="DmsServerlessPipelineProps" id="cdk-dms-replication.DmsServerlessPipelineProps"></a>
+
+Props for {@link DmsServerlessPipeline}.
+
+#### Initializer <a name="Initializer" id="cdk-dms-replication.DmsServerlessPipelineProps.Initializer"></a>
+
+```typescript
+import { DmsServerlessPipelineProps } from 'cdk-dms-replication'
+
+const dmsServerlessPipelineProps: DmsServerlessPipelineProps = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.maxCapacityUnits">maxCapacityUnits</a></code> | <code>number</code> | Maximum number of DMS Capacity Units (DCUs) the serverless replication may scale up to. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.migrationType">migrationType</a></code> | <code><a href="#cdk-dms-replication.MigrationType">MigrationType</a></code> | The type of migration to perform. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.vpc">vpc</a></code> | <code>aws-cdk-lib.aws_ec2.IVpc</code> | VPC in which to place the serverless replication config. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.createDmsServiceRoles">createDmsServiceRoles</a></code> | <code>boolean</code> | Whether to create the two account-level DMS service roles (`dms-vpc-role` and `dms-cloudwatch-logs-role`) required by DMS. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.enableCloudWatchLogs">enableCloudWatchLogs</a></code> | <code>boolean</code> | Whether to create a CloudWatch log group for the replication config. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.existingSourceEndpoint">existingSourceEndpoint</a></code> | <code><a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a></code> | An existing {@link IDmsEndpoint} to use as the source. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.existingTargetEndpoint">existingTargetEndpoint</a></code> | <code><a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a></code> | An existing {@link IDmsEndpoint} to use as the target. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.kmsKey">kmsKey</a></code> | <code>aws-cdk-lib.aws_kms.IKey</code> | KMS key used to encrypt replication storage at rest. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.logRetention">logRetention</a></code> | <code>aws-cdk-lib.aws_logs.RetentionDays</code> | Retention period for the CloudWatch log group. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.minCapacityUnits">minCapacityUnits</a></code> | <code>number</code> | Minimum number of DCUs DMS will provision at start-up. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.multiAz">multiAz</a></code> | <code>boolean</code> | Whether the serverless replication is Multi-AZ. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.preferredMaintenanceWindow">preferredMaintenanceWindow</a></code> | <code>string</code> | Preferred maintenance window, e.g. "sun:04:00-sun:04:30". |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.removalPolicy">removalPolicy</a></code> | <code>aws-cdk-lib.RemovalPolicy</code> | Removal policy applied to all resources in the pipeline. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.replicationConfigIdentifier">replicationConfigIdentifier</a></code> | <code>string</code> | Logical identifier for the replication config resource. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.securityGroups">securityGroups</a></code> | <code>aws-cdk-lib.aws_ec2.ISecurityGroup[]</code> | Security groups to attach to the serverless replication config. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.sourceEndpoint">sourceEndpoint</a></code> | <code><a href="#cdk-dms-replication.SourceEndpointOptions">SourceEndpointOptions</a></code> | Source endpoint configuration. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.tableMappings">tableMappings</a></code> | <code>string</code> | Table mappings JSON string. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.targetEndpoint">targetEndpoint</a></code> | <code><a href="#cdk-dms-replication.TargetEndpointOptions">TargetEndpointOptions</a></code> | Target endpoint configuration. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.taskSettings">taskSettings</a></code> | <code>string</code> | Replication settings JSON string (equivalent to task settings for classic DMS). |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.vpcSubnets">vpcSubnets</a></code> | <code>aws-cdk-lib.aws_ec2.SubnetSelection</code> | Subnet selection for the replication subnet group. |
+
+---
+
+##### `maxCapacityUnits`<sup>Required</sup> <a name="maxCapacityUnits" id="cdk-dms-replication.DmsServerlessPipelineProps.property.maxCapacityUnits"></a>
+
+```typescript
+public readonly maxCapacityUnits: number;
+```
+
+- *Type:* number
+
+Maximum number of DMS Capacity Units (DCUs) the serverless replication may scale up to.
+
+Valid values: 1, 2, 4, 8, 16, 32, 64, 128, 192, 256, 384.
+
+---
+
+##### `migrationType`<sup>Required</sup> <a name="migrationType" id="cdk-dms-replication.DmsServerlessPipelineProps.property.migrationType"></a>
+
+```typescript
+public readonly migrationType: MigrationType;
+```
+
+- *Type:* <a href="#cdk-dms-replication.MigrationType">MigrationType</a>
+
+The type of migration to perform.
+
+---
+
+##### `vpc`<sup>Required</sup> <a name="vpc" id="cdk-dms-replication.DmsServerlessPipelineProps.property.vpc"></a>
+
+```typescript
+public readonly vpc: IVpc;
+```
+
+- *Type:* aws-cdk-lib.aws_ec2.IVpc
+
+VPC in which to place the serverless replication config.
+
+The config is placed in private subnets.
+
+---
+
+##### `createDmsServiceRoles`<sup>Optional</sup> <a name="createDmsServiceRoles" id="cdk-dms-replication.DmsServerlessPipelineProps.property.createDmsServiceRoles"></a>
+
+```typescript
+public readonly createDmsServiceRoles: boolean;
+```
+
+- *Type:* boolean
+- *Default:* true
+
+Whether to create the two account-level DMS service roles (`dms-vpc-role` and `dms-cloudwatch-logs-role`) required by DMS.
+
+Set to `false` if the roles already exist — for example, because a
+`DmsMigrationPipeline` or a prior manual deployment already created them.
+Attempting to create roles with the same name twice causes a CloudFormation
+`EntityAlreadyExists` error.
+
+---
+
+##### `enableCloudWatchLogs`<sup>Optional</sup> <a name="enableCloudWatchLogs" id="cdk-dms-replication.DmsServerlessPipelineProps.property.enableCloudWatchLogs"></a>
+
+```typescript
+public readonly enableCloudWatchLogs: boolean;
+```
+
+- *Type:* boolean
+- *Default:* true
+
+Whether to create a CloudWatch log group for the replication config.
+
+---
+
+##### `existingSourceEndpoint`<sup>Optional</sup> <a name="existingSourceEndpoint" id="cdk-dms-replication.DmsServerlessPipelineProps.property.existingSourceEndpoint"></a>
+
+```typescript
+public readonly existingSourceEndpoint: IDmsEndpoint;
+```
+
+- *Type:* <a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a>
+
+An existing {@link IDmsEndpoint} to use as the source.
+
+Provide this OR `sourceEndpoint` — not both.
+
+---
+
+##### `existingTargetEndpoint`<sup>Optional</sup> <a name="existingTargetEndpoint" id="cdk-dms-replication.DmsServerlessPipelineProps.property.existingTargetEndpoint"></a>
+
+```typescript
+public readonly existingTargetEndpoint: IDmsEndpoint;
+```
+
+- *Type:* <a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a>
+
+An existing {@link IDmsEndpoint} to use as the target.
+
+Provide this OR `targetEndpoint` — not both.
+
+---
+
+##### `kmsKey`<sup>Optional</sup> <a name="kmsKey" id="cdk-dms-replication.DmsServerlessPipelineProps.property.kmsKey"></a>
+
+```typescript
+public readonly kmsKey: IKey;
+```
+
+- *Type:* aws-cdk-lib.aws_kms.IKey
+
+KMS key used to encrypt replication storage at rest.
+
+A new key is created if not provided.
+
+---
+
+##### `logRetention`<sup>Optional</sup> <a name="logRetention" id="cdk-dms-replication.DmsServerlessPipelineProps.property.logRetention"></a>
+
+```typescript
+public readonly logRetention: RetentionDays;
+```
+
+- *Type:* aws-cdk-lib.aws_logs.RetentionDays
+- *Default:* logs.RetentionDays.ONE_MONTH
+
+Retention period for the CloudWatch log group.
+
+---
+
+##### `minCapacityUnits`<sup>Optional</sup> <a name="minCapacityUnits" id="cdk-dms-replication.DmsServerlessPipelineProps.property.minCapacityUnits"></a>
+
+```typescript
+public readonly minCapacityUnits: number;
+```
+
+- *Type:* number
+- *Default:* DMS auto-determines based on workload
+
+Minimum number of DCUs DMS will provision at start-up.
+
+---
+
+##### `multiAz`<sup>Optional</sup> <a name="multiAz" id="cdk-dms-replication.DmsServerlessPipelineProps.property.multiAz"></a>
+
+```typescript
+public readonly multiAz: boolean;
+```
+
+- *Type:* boolean
+- *Default:* false
+
+Whether the serverless replication is Multi-AZ.
+
+---
+
+##### `preferredMaintenanceWindow`<sup>Optional</sup> <a name="preferredMaintenanceWindow" id="cdk-dms-replication.DmsServerlessPipelineProps.property.preferredMaintenanceWindow"></a>
+
+```typescript
+public readonly preferredMaintenanceWindow: string;
+```
+
+- *Type:* string
+
+Preferred maintenance window, e.g. "sun:04:00-sun:04:30".
+
+---
+
+##### `removalPolicy`<sup>Optional</sup> <a name="removalPolicy" id="cdk-dms-replication.DmsServerlessPipelineProps.property.removalPolicy"></a>
+
+```typescript
+public readonly removalPolicy: RemovalPolicy;
+```
+
+- *Type:* aws-cdk-lib.RemovalPolicy
+- *Default:* cdk.RemovalPolicy.DESTROY
+
+Removal policy applied to all resources in the pipeline.
+
+---
+
+##### `replicationConfigIdentifier`<sup>Optional</sup> <a name="replicationConfigIdentifier" id="cdk-dms-replication.DmsServerlessPipelineProps.property.replicationConfigIdentifier"></a>
+
+```typescript
+public readonly replicationConfigIdentifier: string;
+```
+
+- *Type:* string
+- *Default:* unique name derived from the construct id
+
+Logical identifier for the replication config resource.
+
+---
+
+##### `securityGroups`<sup>Optional</sup> <a name="securityGroups" id="cdk-dms-replication.DmsServerlessPipelineProps.property.securityGroups"></a>
+
+```typescript
+public readonly securityGroups: ISecurityGroup[];
+```
+
+- *Type:* aws-cdk-lib.aws_ec2.ISecurityGroup[]
+
+Security groups to attach to the serverless replication config.
+
+A new security group is created if none are provided.
+
+---
+
+##### `sourceEndpoint`<sup>Optional</sup> <a name="sourceEndpoint" id="cdk-dms-replication.DmsServerlessPipelineProps.property.sourceEndpoint"></a>
+
+```typescript
+public readonly sourceEndpoint: SourceEndpointOptions;
+```
+
+- *Type:* <a href="#cdk-dms-replication.SourceEndpointOptions">SourceEndpointOptions</a>
+
+Source endpoint configuration.
+
+Provide this OR `existingSourceEndpoint` — not both.
+
+---
+
+##### `tableMappings`<sup>Optional</sup> <a name="tableMappings" id="cdk-dms-replication.DmsServerlessPipelineProps.property.tableMappings"></a>
+
+```typescript
+public readonly tableMappings: string;
+```
+
+- *Type:* string
+
+Table mappings JSON string.
+
+Use {@link TableMappings} to build this.
+Defaults to "include all tables in all schemas" if not provided.
+
+---
+
+##### `targetEndpoint`<sup>Optional</sup> <a name="targetEndpoint" id="cdk-dms-replication.DmsServerlessPipelineProps.property.targetEndpoint"></a>
+
+```typescript
+public readonly targetEndpoint: TargetEndpointOptions;
+```
+
+- *Type:* <a href="#cdk-dms-replication.TargetEndpointOptions">TargetEndpointOptions</a>
+
+Target endpoint configuration.
+
+Provide this OR `existingTargetEndpoint` — not both.
+
+---
+
+##### `taskSettings`<sup>Optional</sup> <a name="taskSettings" id="cdk-dms-replication.DmsServerlessPipelineProps.property.taskSettings"></a>
+
+```typescript
+public readonly taskSettings: string;
+```
+
+- *Type:* string
+
+Replication settings JSON string (equivalent to task settings for classic DMS).
+
+Use {@link TaskSettings } to build this.
+Sensible defaults are applied by DMS if not provided.
+
+---
+
+##### `vpcSubnets`<sup>Optional</sup> <a name="vpcSubnets" id="cdk-dms-replication.DmsServerlessPipelineProps.property.vpcSubnets"></a>
+
+```typescript
+public readonly vpcSubnets: SubnetSelection;
+```
+
+- *Type:* aws-cdk-lib.aws_ec2.SubnetSelection
+- *Default:* private subnets with egress
+
+Subnet selection for the replication subnet group.
 
 ---
 
@@ -4573,6 +5236,58 @@ Size of the write buffer (in KB).
 
 ---
 
+### RuleObjectLocatorValue <a name="RuleObjectLocatorValue" id="cdk-dms-replication.RuleObjectLocatorValue"></a>
+
+Object locator identifying the schema, table, and optional column a rule targets.
+
+#### Initializer <a name="Initializer" id="cdk-dms-replication.RuleObjectLocatorValue.Initializer"></a>
+
+```typescript
+import { RuleObjectLocatorValue } from 'cdk-dms-replication'
+
+const ruleObjectLocatorValue: RuleObjectLocatorValue = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk-dms-replication.RuleObjectLocatorValue.property.schemaName">schemaName</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk-dms-replication.RuleObjectLocatorValue.property.columnName">columnName</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#cdk-dms-replication.RuleObjectLocatorValue.property.tableName">tableName</a></code> | <code>string</code> | *No description.* |
+
+---
+
+##### `schemaName`<sup>Required</sup> <a name="schemaName" id="cdk-dms-replication.RuleObjectLocatorValue.property.schemaName"></a>
+
+```typescript
+public readonly schemaName: string;
+```
+
+- *Type:* string
+
+---
+
+##### `columnName`<sup>Optional</sup> <a name="columnName" id="cdk-dms-replication.RuleObjectLocatorValue.property.columnName"></a>
+
+```typescript
+public readonly columnName: string;
+```
+
+- *Type:* string
+
+---
+
+##### `tableName`<sup>Optional</sup> <a name="tableName" id="cdk-dms-replication.RuleObjectLocatorValue.property.tableName"></a>
+
+```typescript
+public readonly tableName: string;
+```
+
+- *Type:* string
+
+---
+
 ### S3Settings <a name="S3Settings" id="cdk-dms-replication.S3Settings"></a>
 
 Settings for Amazon S3 endpoints (source or target).
@@ -5175,7 +5890,7 @@ const sourceEndpointOptions: SourceEndpointOptions = { ... }
 | <code><a href="#cdk-dms-replication.SourceEndpointOptions.property.mongoDbSettings">mongoDbSettings</a></code> | <code><a href="#cdk-dms-replication.MongoDbSettings">MongoDbSettings</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.SourceEndpointOptions.property.mySqlSettings">mySqlSettings</a></code> | <code><a href="#cdk-dms-replication.MySqlSettings">MySqlSettings</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.SourceEndpointOptions.property.oracleSettings">oracleSettings</a></code> | <code><a href="#cdk-dms-replication.OracleSettings">OracleSettings</a></code> | *No description.* |
-| <code><a href="#cdk-dms-replication.SourceEndpointOptions.property.password">password</a></code> | <code>aws-cdk-lib.SecretValue</code> | *No description.* |
+| <code><a href="#cdk-dms-replication.SourceEndpointOptions.property.password">password</a></code> | <code>aws-cdk-lib.SecretValue</code> | Database password. |
 | <code><a href="#cdk-dms-replication.SourceEndpointOptions.property.port">port</a></code> | <code>number</code> | *No description.* |
 | <code><a href="#cdk-dms-replication.SourceEndpointOptions.property.postgreSqlSettings">postgreSqlSettings</a></code> | <code><a href="#cdk-dms-replication.PostgreSqlSettings">PostgreSqlSettings</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.SourceEndpointOptions.property.s3Settings">s3Settings</a></code> | <code><a href="#cdk-dms-replication.S3Settings">S3Settings</a></code> | *No description.* |
@@ -5284,6 +5999,12 @@ public readonly password: SecretValue;
 ```
 
 - *Type:* aws-cdk-lib.SecretValue
+
+Database password.
+
+The resolved value is stored as **plaintext** in the
+CloudFormation template. Prefer `secretsManagerSecretId` in the
+engine-specific settings for production workloads.
 
 ---
 
@@ -5558,13 +6279,11 @@ const tableMappingRule: TableMappingRule = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk-dms-replication.TableMappingRule.property.objectLocator">objectLocator</a></code> | <code>object</code> | *No description.* |
+| <code><a href="#cdk-dms-replication.TableMappingRule.property.objectLocator">objectLocator</a></code> | <code><a href="#cdk-dms-replication.RuleObjectLocatorValue">RuleObjectLocatorValue</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.TableMappingRule.property.ruleAction">ruleAction</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk-dms-replication.TableMappingRule.property.ruleId">ruleId</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk-dms-replication.TableMappingRule.property.ruleName">ruleName</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk-dms-replication.TableMappingRule.property.ruleType">ruleType</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#cdk-dms-replication.TableMappingRule.property.columnAdditions">columnAdditions</a></code> | <code>object[]</code> | *No description.* |
-| <code><a href="#cdk-dms-replication.TableMappingRule.property.filters">filters</a></code> | <code>object[]</code> | *No description.* |
 | <code><a href="#cdk-dms-replication.TableMappingRule.property.oldValue">oldValue</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#cdk-dms-replication.TableMappingRule.property.value">value</a></code> | <code>string</code> | *No description.* |
 
@@ -5573,10 +6292,10 @@ const tableMappingRule: TableMappingRule = { ... }
 ##### `objectLocator`<sup>Required</sup> <a name="objectLocator" id="cdk-dms-replication.TableMappingRule.property.objectLocator"></a>
 
 ```typescript
-public readonly objectLocator: object;
+public readonly objectLocator: RuleObjectLocatorValue;
 ```
 
-- *Type:* object
+- *Type:* <a href="#cdk-dms-replication.RuleObjectLocatorValue">RuleObjectLocatorValue</a>
 
 ---
 
@@ -5617,26 +6336,6 @@ public readonly ruleType: string;
 ```
 
 - *Type:* string
-
----
-
-##### `columnAdditions`<sup>Optional</sup> <a name="columnAdditions" id="cdk-dms-replication.TableMappingRule.property.columnAdditions"></a>
-
-```typescript
-public readonly columnAdditions: object[];
-```
-
-- *Type:* object[]
-
----
-
-##### `filters`<sup>Optional</sup> <a name="filters" id="cdk-dms-replication.TableMappingRule.property.filters"></a>
-
-```typescript
-public readonly filters: object[];
-```
-
-- *Type:* object[]
 
 ---
 
@@ -5692,7 +6391,7 @@ const targetEndpointOptions: TargetEndpointOptions = { ... }
 | <code><a href="#cdk-dms-replication.TargetEndpointOptions.property.neptuneSettings">neptuneSettings</a></code> | <code><a href="#cdk-dms-replication.NeptuneSettings">NeptuneSettings</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.TargetEndpointOptions.property.openSearchSettings">openSearchSettings</a></code> | <code><a href="#cdk-dms-replication.OpenSearchSettings">OpenSearchSettings</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.TargetEndpointOptions.property.oracleSettings">oracleSettings</a></code> | <code><a href="#cdk-dms-replication.OracleSettings">OracleSettings</a></code> | *No description.* |
-| <code><a href="#cdk-dms-replication.TargetEndpointOptions.property.password">password</a></code> | <code>aws-cdk-lib.SecretValue</code> | *No description.* |
+| <code><a href="#cdk-dms-replication.TargetEndpointOptions.property.password">password</a></code> | <code>aws-cdk-lib.SecretValue</code> | Database password. |
 | <code><a href="#cdk-dms-replication.TargetEndpointOptions.property.port">port</a></code> | <code>number</code> | *No description.* |
 | <code><a href="#cdk-dms-replication.TargetEndpointOptions.property.postgreSqlSettings">postgreSqlSettings</a></code> | <code><a href="#cdk-dms-replication.PostgreSqlSettings">PostgreSqlSettings</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.TargetEndpointOptions.property.redisSettings">redisSettings</a></code> | <code><a href="#cdk-dms-replication.RedisSettings">RedisSettings</a></code> | *No description.* |
@@ -5854,6 +6553,12 @@ public readonly password: SecretValue;
 
 - *Type:* aws-cdk-lib.SecretValue
 
+Database password.
+
+The resolved value is stored as **plaintext** in the
+CloudFormation template. Prefer `secretsManagerSecretId` in the
+engine-specific settings for production workloads.
+
 ---
 
 ##### `port`<sup>Optional</sup> <a name="port" id="cdk-dms-replication.TargetEndpointOptions.property.port"></a>
@@ -5971,7 +6676,7 @@ const mappings = new TableMappings()
   .excludeTable('public', 'audit_log')
   .renameSchema('public', 'prod')
   .toLowerCaseTable('public', '%')
-  .build();
+  .toJson();
 ```
 
 
@@ -6493,7 +7198,7 @@ const settings = new TaskSettings()
   .withBatchApply(true, 5, 60)
   .withDataErrorPolicy(ErrorAction.IGNORE_RECORD, 100)
   .withLogging('SOURCE_UNLOAD', LoggingLevel.LOGGER_SEVERITY_DEFAULT)
-  .build();
+  .toJson();
 ```
 
 
@@ -6741,27 +7446,19 @@ Common values: "DROP_AND_CREATE", "TRUNCATE_BEFORE_LOAD", "DO_NOTHING".
 
 - *Implemented By:* <a href="#cdk-dms-replication.DmsEndpoint">DmsEndpoint</a>, <a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a>
 
-Interface identifying a DMS endpoint resource.
+Minimal contract for a DMS endpoint that can be used as a source or target in a {@link DmsReplicationTask } or {@link DmsMigrationPipeline }.
+
+Use this interface when referencing an endpoint created outside of this
+construct (e.g. by ARN). For endpoints created by this library, use the
+concrete {@link DmsEndpoint} class directly — it exposes `cfnEndpoint`
+for L1 escape-hatch access.
 
 
 #### Properties <a name="Properties" id="Properties"></a>
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk-dms-replication.IDmsEndpoint.property.cfnEndpoint">cfnEndpoint</a></code> | <code>aws-cdk-lib.aws_dms.CfnEndpoint</code> | The underlying CloudFormation endpoint. |
 | <code><a href="#cdk-dms-replication.IDmsEndpoint.property.endpointArn">endpointArn</a></code> | <code>string</code> | ARN of the DMS endpoint. |
-
----
-
-##### `cfnEndpoint`<sup>Required</sup> <a name="cfnEndpoint" id="cdk-dms-replication.IDmsEndpoint.property.cfnEndpoint"></a>
-
-```typescript
-public readonly cfnEndpoint: CfnEndpoint;
-```
-
-- *Type:* aws-cdk-lib.aws_dms.CfnEndpoint
-
-The underlying CloudFormation endpoint.
 
 ---
 
@@ -7565,8 +8262,6 @@ DMS replication instance class.
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.T3_SMALL">T3_SMALL</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.T3_MEDIUM">T3_MEDIUM</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.T3_LARGE">T3_LARGE</a></code> | *No description.* |
-| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.T3_XLARGE">T3_XLARGE</a></code> | *No description.* |
-| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.T3_2XLARGE">T3_2XLARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C5_LARGE">C5_LARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C5_XLARGE">C5_XLARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C5_2XLARGE">C5_2XLARGE</a></code> | *No description.* |
@@ -7575,6 +8270,24 @@ DMS replication instance class.
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C5_12XLARGE">C5_12XLARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C5_18XLARGE">C5_18XLARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C5_24XLARGE">C5_24XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C6I_LARGE">C6I_LARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C6I_XLARGE">C6I_XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C6I_2XLARGE">C6I_2XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C6I_4XLARGE">C6I_4XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C6I_8XLARGE">C6I_8XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C6I_12XLARGE">C6I_12XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C6I_16XLARGE">C6I_16XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C6I_24XLARGE">C6I_24XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C6I_32XLARGE">C6I_32XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C7I_LARGE">C7I_LARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C7I_XLARGE">C7I_XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.X7I_2XLARGE">X7I_2XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.X7I_4XLARGE">X7I_4XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.X7I_8XLARGE">X7I_8XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.X7I_12XLARGE">X7I_12XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.X7I_16XLARGE">X7I_16XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.X7I_24XLARGE">X7I_24XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.X7I_48XLARGE">X7I_48XLARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R5_LARGE">R5_LARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R5_XLARGE">R5_XLARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R5_2XLARGE">R5_2XLARGE</a></code> | *No description.* |
@@ -7583,6 +8296,24 @@ DMS replication instance class.
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R5_12XLARGE">R5_12XLARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R5_16XLARGE">R5_16XLARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R5_24XLARGE">R5_24XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R6I_LARGE">R6I_LARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R6I_XLARGE">R6I_XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R6I_2XLARGE">R6I_2XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R6I_4XLARGE">R6I_4XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R6I_8XLARGE">R6I_8XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R6I_12XLARGE">R6I_12XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R6I_16XLARGE">R6I_16XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R6I_24XLARGE">R6I_24XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R6I_32XLARGE">R6I_32XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R7I_LARGE">R7I_LARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R7I_XLARGE">R7I_XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R7I_2XLARGE">R7I_2XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R7I_4XLARGE">R7I_4XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R7I_8XLARGE">R7I_8XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R7I_12XLARGE">R7I_12XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R7I_16XLARGE">R7I_16XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R7I_24XLARGE">R7I_24XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R7I_48XLARGE">R7I_48XLARGE</a></code> | *No description.* |
 
 ---
 
@@ -7602,16 +8333,6 @@ DMS replication instance class.
 
 
 ##### `T3_LARGE` <a name="T3_LARGE" id="cdk-dms-replication.ReplicationInstanceClass.T3_LARGE"></a>
-
----
-
-
-##### `T3_XLARGE` <a name="T3_XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.T3_XLARGE"></a>
-
----
-
-
-##### `T3_2XLARGE` <a name="T3_2XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.T3_2XLARGE"></a>
 
 ---
 
@@ -7656,6 +8377,96 @@ DMS replication instance class.
 ---
 
 
+##### `C6I_LARGE` <a name="C6I_LARGE" id="cdk-dms-replication.ReplicationInstanceClass.C6I_LARGE"></a>
+
+---
+
+
+##### `C6I_XLARGE` <a name="C6I_XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C6I_XLARGE"></a>
+
+---
+
+
+##### `C6I_2XLARGE` <a name="C6I_2XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C6I_2XLARGE"></a>
+
+---
+
+
+##### `C6I_4XLARGE` <a name="C6I_4XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C6I_4XLARGE"></a>
+
+---
+
+
+##### `C6I_8XLARGE` <a name="C6I_8XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C6I_8XLARGE"></a>
+
+---
+
+
+##### `C6I_12XLARGE` <a name="C6I_12XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C6I_12XLARGE"></a>
+
+---
+
+
+##### `C6I_16XLARGE` <a name="C6I_16XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C6I_16XLARGE"></a>
+
+---
+
+
+##### `C6I_24XLARGE` <a name="C6I_24XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C6I_24XLARGE"></a>
+
+---
+
+
+##### `C6I_32XLARGE` <a name="C6I_32XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C6I_32XLARGE"></a>
+
+---
+
+
+##### `C7I_LARGE` <a name="C7I_LARGE" id="cdk-dms-replication.ReplicationInstanceClass.C7I_LARGE"></a>
+
+---
+
+
+##### `C7I_XLARGE` <a name="C7I_XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C7I_XLARGE"></a>
+
+---
+
+
+##### `X7I_2XLARGE` <a name="X7I_2XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.X7I_2XLARGE"></a>
+
+---
+
+
+##### `X7I_4XLARGE` <a name="X7I_4XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.X7I_4XLARGE"></a>
+
+---
+
+
+##### `X7I_8XLARGE` <a name="X7I_8XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.X7I_8XLARGE"></a>
+
+---
+
+
+##### `X7I_12XLARGE` <a name="X7I_12XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.X7I_12XLARGE"></a>
+
+---
+
+
+##### `X7I_16XLARGE` <a name="X7I_16XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.X7I_16XLARGE"></a>
+
+---
+
+
+##### `X7I_24XLARGE` <a name="X7I_24XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.X7I_24XLARGE"></a>
+
+---
+
+
+##### `X7I_48XLARGE` <a name="X7I_48XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.X7I_48XLARGE"></a>
+
+---
+
+
 ##### `R5_LARGE` <a name="R5_LARGE" id="cdk-dms-replication.ReplicationInstanceClass.R5_LARGE"></a>
 
 ---
@@ -7692,6 +8503,96 @@ DMS replication instance class.
 
 
 ##### `R5_24XLARGE` <a name="R5_24XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R5_24XLARGE"></a>
+
+---
+
+
+##### `R6I_LARGE` <a name="R6I_LARGE" id="cdk-dms-replication.ReplicationInstanceClass.R6I_LARGE"></a>
+
+---
+
+
+##### `R6I_XLARGE` <a name="R6I_XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R6I_XLARGE"></a>
+
+---
+
+
+##### `R6I_2XLARGE` <a name="R6I_2XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R6I_2XLARGE"></a>
+
+---
+
+
+##### `R6I_4XLARGE` <a name="R6I_4XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R6I_4XLARGE"></a>
+
+---
+
+
+##### `R6I_8XLARGE` <a name="R6I_8XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R6I_8XLARGE"></a>
+
+---
+
+
+##### `R6I_12XLARGE` <a name="R6I_12XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R6I_12XLARGE"></a>
+
+---
+
+
+##### `R6I_16XLARGE` <a name="R6I_16XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R6I_16XLARGE"></a>
+
+---
+
+
+##### `R6I_24XLARGE` <a name="R6I_24XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R6I_24XLARGE"></a>
+
+---
+
+
+##### `R6I_32XLARGE` <a name="R6I_32XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R6I_32XLARGE"></a>
+
+---
+
+
+##### `R7I_LARGE` <a name="R7I_LARGE" id="cdk-dms-replication.ReplicationInstanceClass.R7I_LARGE"></a>
+
+---
+
+
+##### `R7I_XLARGE` <a name="R7I_XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R7I_XLARGE"></a>
+
+---
+
+
+##### `R7I_2XLARGE` <a name="R7I_2XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R7I_2XLARGE"></a>
+
+---
+
+
+##### `R7I_4XLARGE` <a name="R7I_4XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R7I_4XLARGE"></a>
+
+---
+
+
+##### `R7I_8XLARGE` <a name="R7I_8XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R7I_8XLARGE"></a>
+
+---
+
+
+##### `R7I_12XLARGE` <a name="R7I_12XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R7I_12XLARGE"></a>
+
+---
+
+
+##### `R7I_16XLARGE` <a name="R7I_16XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R7I_16XLARGE"></a>
+
+---
+
+
+##### `R7I_24XLARGE` <a name="R7I_24XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R7I_24XLARGE"></a>
+
+---
+
+
+##### `R7I_48XLARGE` <a name="R7I_48XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.R7I_48XLARGE"></a>
 
 ---
 

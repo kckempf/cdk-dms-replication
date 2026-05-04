@@ -8,6 +8,10 @@ export {
 } from './migration-pipeline';
 export { DmsReplicationInstance, DmsReplicationInstanceProps } from './replication-instance';
 export { DmsReplicationTask, DmsReplicationTaskProps } from './replication-task';
+export {
+  DmsServerlessPipeline,
+  DmsServerlessPipelineProps,
+} from './serverless-pipeline';
 
 // Builders
 export {

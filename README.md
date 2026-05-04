@@ -9,6 +9,7 @@ L3 CDK constructs for [Amazon Database Migration Service (DMS)](https://aws.amaz
 ## Features
 
 - **All migration patterns** — full load, CDC, and full-load-and-CDC
+- **Classic and Serverless** — `DmsMigrationPipeline` (fixed instance) or `DmsServerlessPipeline` (auto-scales DCUs)
 - **All DMS engines** — MySQL, PostgreSQL, Oracle, SQL Server, SAP ASE, IBM Db2, MongoDB, DocumentDB, S3, DynamoDB, Redshift, Kinesis, Kafka, OpenSearch, Neptune, Redis
 - **Secure defaults** — replication instance placed in private subnets, KMS encryption at rest, security group auto-created
 - **Fluent builders** — `TableMappings` and `TaskSettings` builders produce the JSON DMS expects without hand-crafting strings
@@ -55,7 +56,9 @@ go get github.com/kckempf/cdk-dms-replication-go
 
 ## Quick start
 
-The simplest usage is `DmsMigrationPipeline`, which provisions a replication instance, both endpoints, and a replication task in one construct.
+### Classic pipeline (fixed replication instance)
+
+`DmsMigrationPipeline` provisions a replication instance, both endpoints, and a replication task in one construct.
 
 ```typescript
 import * as cdk from 'aws-cdk-lib';
@@ -102,6 +105,45 @@ new DmsMigrationPipeline(stack, 'Pipeline', {
 ```
 
 > **Note:** The `tableMappings` default (when omitted) is to include all tables in all schemas.
+
+### Serverless pipeline (auto-scaling)
+
+`DmsServerlessPipeline` uses DMS Serverless, which automatically scales capacity (measured in DMS Capacity Units — DCUs) between a configurable minimum and maximum. There is no replication instance to size or manage.
+
+```typescript
+import {
+  DmsServerlessPipeline,
+  EndpointEngine,
+  MigrationType,
+} from 'cdk-dms-replication';
+
+new DmsServerlessPipeline(stack, 'Pipeline', {
+  vpc,
+  maxCapacityUnits: 16,           // required; valid values: 1,2,4,8,16,32,64,128,192,256,384
+  minCapacityUnits: 2,            // optional; DMS auto-determines if omitted
+  migrationType: MigrationType.FULL_LOAD_AND_CDC,
+
+  sourceEndpoint: {
+    engine: EndpointEngine.MYSQL,
+    serverName: 'mysql.internal.example.com',
+    port: 3306,
+    username: 'dms_user',
+    password: cdk.SecretValue.secretsManager('mysql-dms-password'),
+    databaseName: 'orders',
+  },
+
+  targetEndpoint: {
+    engine: EndpointEngine.AURORA_POSTGRESQL,
+    serverName: cluster.clusterEndpoint.hostname,
+    port: 5432,
+    username: 'dms_user',
+    password: cdk.SecretValue.secretsManager('aurora-dms-password'),
+    databaseName: 'orders',
+  },
+});
+```
+
+> **CDC start/stop position limitation:** `DmsServerlessPipeline` does not support `cdcStartPosition` or `cdcStartTime` at the CloudFormation level. To start replication from a specific LSN or timestamp, call the [`StartReplication` API](https://docs.aws.amazon.com/dms/latest/APIReference/API_StartReplication.html) after the config is created.
 
 ---
 
@@ -452,10 +494,9 @@ new DmsMigrationPipeline(stack, 'Pipeline', {
   vpc,
   migrationType: MigrationType.FULL_LOAD_AND_CDC,
 
-  // Instance sizing
-  replicationInstanceClass: ReplicationInstanceClass.R5_4XLARGE,
+  // Instance sizing (default: R6I_LARGE)
+  replicationInstanceClass: ReplicationInstanceClass.R6I_4XLARGE,
   allocatedStorage: 500,        // GB
-  engineVersion: '3.5.3',
 
   // High availability
   multiAz: true,
@@ -493,7 +534,7 @@ import {
 // 1. Replication instance
 const instance = new DmsReplicationInstance(stack, 'Instance', {
   vpc,
-  replicationInstanceClass: ReplicationInstanceClass.R5_LARGE,
+  replicationInstanceClass: ReplicationInstanceClass.R6I_LARGE,
   multiAz: true,
 });
 
