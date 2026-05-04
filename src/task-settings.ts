@@ -412,6 +412,7 @@ export class TaskSettings {
         FullLoadIgnoreConflicts: true,
       },
       ChangeProcessingTuning: {
+        BatchApplyEnabled: this.cdcSettings.batchApplyEnabled ?? false,
         BatchApplyPreserveTransaction: true,
         BatchApplyTimeoutMin: this.cdcSettings.batchApplyTimeoutMin ?? 1,
         BatchApplyTimeoutMax: this.cdcSettings.batchApplyTimeoutMax ?? 30,

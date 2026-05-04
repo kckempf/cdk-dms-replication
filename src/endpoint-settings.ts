@@ -4,14 +4,12 @@ import {
   DatePartitionSequence,
   EncodingType,
   EncryptionMode,
-  KafkaSaslMechanism,
   KafkaSecurityProtocol,
   MessageFormat,
   MongoAuthMechanism,
   MongoAuthType,
   MongoNestingLevel,
   MySqlTargetDbType,
-  OracleCdcPlugin,
   ParquetVersion,
   PostgresCdcPlugin,
   S3DataFormat,
@@ -108,8 +106,6 @@ export interface OracleSettings {
   readonly asmServer?: string;
   /** ASM user name. */
   readonly asmUser?: string;
-  /** CDC plugin to use: LogMiner or BinaryReader. */
-  readonly cdcPlugin?: OracleCdcPlugin;
   /** Semantics for char length: BYTE or CHAR. */
   readonly charLengthSemantics?: string;
   /** Convert TIMESTAMP WITH TIME ZONE to UTC. */
@@ -168,8 +164,6 @@ export interface SqlServerSettings {
   readonly bcpPacketSize?: number;
   /** Filegroup in SQL Server for control tables. */
   readonly controlTablesFileGroup?: string;
-  /** Database name on the SQL Server endpoint. */
-  readonly databaseName?: string;
   /** Whether to query a single AlwaysOn node. */
   readonly querySingleAlwaysOnNode?: boolean;
   /** Whether to use backup files for CDC. */
@@ -196,12 +190,6 @@ export interface SqlServerSettings {
 
 /** Settings for SAP Adaptive Server Enterprise (Sybase) endpoints. */
 export interface SapAseSettings {
-  /** SQL to run after connecting. */
-  readonly afterConnectScript?: string;
-  /** Whether DMS enables password encryption. */
-  readonly enableUnicode?: boolean;
-  /** Whether DMS strips the double quotes from the result set. */
-  readonly trimAltText?: boolean;
   /** ARN of IAM role for Secrets Manager. */
   readonly secretsManagerAccessRoleArn?: string;
   /** Full ARN or name of the Secrets Manager secret. */
@@ -214,8 +202,6 @@ export interface SapAseSettings {
 
 /** Settings for IBM Db2 LUW endpoints. */
 export interface Db2Settings {
-  /** The database name on the Db2 endpoint. */
-  readonly databaseName?: string;
   /** Maximum number of bytes per read operation. */
   readonly maxKBytesPerRead?: number;
   /** Enables ongoing replication (CDC) for Db2. */
@@ -460,8 +446,6 @@ export interface KafkaSettings {
   readonly partitionIncludeSchemaTable?: boolean;
   /** Security protocol for the Kafka connection. */
   readonly securityProtocol?: KafkaSecurityProtocol;
-  /** SASL mechanism for SASL_SSL connections. */
-  readonly saslMechanism?: KafkaSaslMechanism;
   /** SASL username. */
   readonly saslUsername?: string;
   /** SASL password. */

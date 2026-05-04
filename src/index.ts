@@ -62,7 +62,6 @@ export {
   EncryptionMode,
   EndpointEngine,
   EndpointType,
-  KafkaSaslMechanism,
   KafkaSecurityProtocol,
   MessageFormat,
   MigrationType,

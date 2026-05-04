@@ -1398,7 +1398,6 @@ const db2Settings: Db2Settings = { ... }
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk-dms-replication.Db2Settings.property.currentLsn">currentLsn</a></code> | <code>string</code> | Current LSN as of which DMS should start reading. |
-| <code><a href="#cdk-dms-replication.Db2Settings.property.databaseName">databaseName</a></code> | <code>string</code> | The database name on the Db2 endpoint. |
 | <code><a href="#cdk-dms-replication.Db2Settings.property.maxKBytesPerRead">maxKBytesPerRead</a></code> | <code>number</code> | Maximum number of bytes per read operation. |
 | <code><a href="#cdk-dms-replication.Db2Settings.property.secretsManagerAccessRoleArn">secretsManagerAccessRoleArn</a></code> | <code>string</code> | ARN of IAM role for Secrets Manager. |
 | <code><a href="#cdk-dms-replication.Db2Settings.property.secretsManagerSecretId">secretsManagerSecretId</a></code> | <code>string</code> | Full ARN or name of the Secrets Manager secret. |
@@ -1415,18 +1414,6 @@ public readonly currentLsn: string;
 - *Type:* string
 
 Current LSN as of which DMS should start reading.
-
----
-
-##### `databaseName`<sup>Optional</sup> <a name="databaseName" id="cdk-dms-replication.Db2Settings.property.databaseName"></a>
-
-```typescript
-public readonly databaseName: string;
-```
-
-- *Type:* string
-
-The database name on the Db2 endpoint.
 
 ---
 
@@ -3218,7 +3205,6 @@ const kafkaSettings: KafkaSettings = { ... }
 | <code><a href="#cdk-dms-replication.KafkaSettings.property.messageMaxBytes">messageMaxBytes</a></code> | <code>number</code> | Maximum message size in bytes. |
 | <code><a href="#cdk-dms-replication.KafkaSettings.property.noHexPrefix">noHexPrefix</a></code> | <code>boolean</code> | Whether to omit the hex prefix from binary values. |
 | <code><a href="#cdk-dms-replication.KafkaSettings.property.partitionIncludeSchemaTable">partitionIncludeSchemaTable</a></code> | <code>boolean</code> | Whether to include the schema name in the partition key. |
-| <code><a href="#cdk-dms-replication.KafkaSettings.property.saslMechanism">saslMechanism</a></code> | <code><a href="#cdk-dms-replication.KafkaSaslMechanism">KafkaSaslMechanism</a></code> | SASL mechanism for SASL_SSL connections. |
 | <code><a href="#cdk-dms-replication.KafkaSettings.property.saslPassword">saslPassword</a></code> | <code>aws-cdk-lib.SecretValue</code> | SASL password. |
 | <code><a href="#cdk-dms-replication.KafkaSettings.property.saslUsername">saslUsername</a></code> | <code>string</code> | SASL username. |
 | <code><a href="#cdk-dms-replication.KafkaSettings.property.securityProtocol">securityProtocol</a></code> | <code><a href="#cdk-dms-replication.KafkaSecurityProtocol">KafkaSecurityProtocol</a></code> | Security protocol for the Kafka connection. |
@@ -3347,18 +3333,6 @@ public readonly partitionIncludeSchemaTable: boolean;
 - *Type:* boolean
 
 Whether to include the schema name in the partition key.
-
----
-
-##### `saslMechanism`<sup>Optional</sup> <a name="saslMechanism" id="cdk-dms-replication.KafkaSettings.property.saslMechanism"></a>
-
-```typescript
-public readonly saslMechanism: KafkaSaslMechanism;
-```
-
-- *Type:* <a href="#cdk-dms-replication.KafkaSaslMechanism">KafkaSaslMechanism</a>
-
-SASL mechanism for SASL_SSL connections.
 
 ---
 
@@ -4117,7 +4091,6 @@ const oracleSettings: OracleSettings = { ... }
 | <code><a href="#cdk-dms-replication.OracleSettings.property.asmPassword">asmPassword</a></code> | <code>aws-cdk-lib.SecretValue</code> | ASM password. |
 | <code><a href="#cdk-dms-replication.OracleSettings.property.asmServer">asmServer</a></code> | <code>string</code> | ASM server address. |
 | <code><a href="#cdk-dms-replication.OracleSettings.property.asmUser">asmUser</a></code> | <code>string</code> | ASM user name. |
-| <code><a href="#cdk-dms-replication.OracleSettings.property.cdcPlugin">cdcPlugin</a></code> | <code><a href="#cdk-dms-replication.OracleCdcPlugin">OracleCdcPlugin</a></code> | CDC plugin to use: LogMiner or BinaryReader. |
 | <code><a href="#cdk-dms-replication.OracleSettings.property.charLengthSemantics">charLengthSemantics</a></code> | <code>string</code> | Semantics for char length: BYTE or CHAR. |
 | <code><a href="#cdk-dms-replication.OracleSettings.property.convertTimestampWithZoneToUtc">convertTimestampWithZoneToUtc</a></code> | <code>boolean</code> | Convert TIMESTAMP WITH TIME ZONE to UTC. |
 | <code><a href="#cdk-dms-replication.OracleSettings.property.directPathNoLog">directPathNoLog</a></code> | <code>boolean</code> | Whether DMS uses direct path full load. |
@@ -4249,18 +4222,6 @@ public readonly asmUser: string;
 - *Type:* string
 
 ASM user name.
-
----
-
-##### `cdcPlugin`<sup>Optional</sup> <a name="cdcPlugin" id="cdk-dms-replication.OracleSettings.property.cdcPlugin"></a>
-
-```typescript
-public readonly cdcPlugin: OracleCdcPlugin;
-```
-
-- *Type:* <a href="#cdk-dms-replication.OracleCdcPlugin">OracleCdcPlugin</a>
-
-CDC plugin to use: LogMiner or BinaryReader.
 
 ---
 
@@ -5795,35 +5756,8 @@ const sapAseSettings: SapAseSettings = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#cdk-dms-replication.SapAseSettings.property.afterConnectScript">afterConnectScript</a></code> | <code>string</code> | SQL to run after connecting. |
-| <code><a href="#cdk-dms-replication.SapAseSettings.property.enableUnicode">enableUnicode</a></code> | <code>boolean</code> | Whether DMS enables password encryption. |
 | <code><a href="#cdk-dms-replication.SapAseSettings.property.secretsManagerAccessRoleArn">secretsManagerAccessRoleArn</a></code> | <code>string</code> | ARN of IAM role for Secrets Manager. |
 | <code><a href="#cdk-dms-replication.SapAseSettings.property.secretsManagerSecretId">secretsManagerSecretId</a></code> | <code>string</code> | Full ARN or name of the Secrets Manager secret. |
-| <code><a href="#cdk-dms-replication.SapAseSettings.property.trimAltText">trimAltText</a></code> | <code>boolean</code> | Whether DMS strips the double quotes from the result set. |
-
----
-
-##### `afterConnectScript`<sup>Optional</sup> <a name="afterConnectScript" id="cdk-dms-replication.SapAseSettings.property.afterConnectScript"></a>
-
-```typescript
-public readonly afterConnectScript: string;
-```
-
-- *Type:* string
-
-SQL to run after connecting.
-
----
-
-##### `enableUnicode`<sup>Optional</sup> <a name="enableUnicode" id="cdk-dms-replication.SapAseSettings.property.enableUnicode"></a>
-
-```typescript
-public readonly enableUnicode: boolean;
-```
-
-- *Type:* boolean
-
-Whether DMS enables password encryption.
 
 ---
 
@@ -5848,18 +5782,6 @@ public readonly secretsManagerSecretId: string;
 - *Type:* string
 
 Full ARN or name of the Secrets Manager secret.
-
----
-
-##### `trimAltText`<sup>Optional</sup> <a name="trimAltText" id="cdk-dms-replication.SapAseSettings.property.trimAltText"></a>
-
-```typescript
-public readonly trimAltText: boolean;
-```
-
-- *Type:* boolean
-
-Whether DMS strips the double quotes from the result set.
 
 ---
 
@@ -6106,7 +6028,6 @@ const sqlServerSettings: SqlServerSettings = { ... }
 | --- | --- | --- |
 | <code><a href="#cdk-dms-replication.SqlServerSettings.property.bcpPacketSize">bcpPacketSize</a></code> | <code>number</code> | Maximum number of bytes per BCP packet. |
 | <code><a href="#cdk-dms-replication.SqlServerSettings.property.controlTablesFileGroup">controlTablesFileGroup</a></code> | <code>string</code> | Filegroup in SQL Server for control tables. |
-| <code><a href="#cdk-dms-replication.SqlServerSettings.property.databaseName">databaseName</a></code> | <code>string</code> | Database name on the SQL Server endpoint. |
 | <code><a href="#cdk-dms-replication.SqlServerSettings.property.querySingleAlwaysOnNode">querySingleAlwaysOnNode</a></code> | <code>boolean</code> | Whether to query a single AlwaysOn node. |
 | <code><a href="#cdk-dms-replication.SqlServerSettings.property.readBackupOnly">readBackupOnly</a></code> | <code>boolean</code> | Whether to use backup files for CDC. |
 | <code><a href="#cdk-dms-replication.SqlServerSettings.property.safeguardPolicy">safeguardPolicy</a></code> | <code><a href="#cdk-dms-replication.SqlServerSafeguardPolicy">SqlServerSafeguardPolicy</a></code> | Safeguard policy for SQL Server CDC. |
@@ -6140,18 +6061,6 @@ public readonly controlTablesFileGroup: string;
 - *Type:* string
 
 Filegroup in SQL Server for control tables.
-
----
-
-##### `databaseName`<sup>Optional</sup> <a name="databaseName" id="cdk-dms-replication.SqlServerSettings.property.databaseName"></a>
-
-```typescript
-public readonly databaseName: string;
-```
-
-- *Type:* string
-
-Database name on the SQL Server endpoint.
 
 ---
 
@@ -7858,29 +7767,6 @@ Ignore the row, continue with the next.
 ##### `STOP_TASK` <a name="STOP_TASK" id="cdk-dms-replication.ErrorAction.STOP_TASK"></a>
 
 Stop the task.
-
----
-
-
-### KafkaSaslMechanism <a name="KafkaSaslMechanism" id="cdk-dms-replication.KafkaSaslMechanism"></a>
-
-SASL mechanism for Kafka SASL_SSL connections.
-
-#### Members <a name="Members" id="Members"></a>
-
-| **Name** | **Description** |
-| --- | --- |
-| <code><a href="#cdk-dms-replication.KafkaSaslMechanism.SCRAM_SHA_512">SCRAM_SHA_512</a></code> | *No description.* |
-| <code><a href="#cdk-dms-replication.KafkaSaslMechanism.PLAIN">PLAIN</a></code> | *No description.* |
-
----
-
-##### `SCRAM_SHA_512` <a name="SCRAM_SHA_512" id="cdk-dms-replication.KafkaSaslMechanism.SCRAM_SHA_512"></a>
-
----
-
-
-##### `PLAIN` <a name="PLAIN" id="cdk-dms-replication.KafkaSaslMechanism.PLAIN"></a>
 
 ---
 

@@ -243,8 +243,7 @@ sourceEndpoint: {
   databaseName: 'ORCL',
   oracleSettings: {
     addSupplementalLogging: true,
-    useLogminerReader: true,
-    cdcPlugin: OracleCdcPlugin.LOGMINER,
+    useLogminerReader: true,   // true = LogMiner, false = BinaryReader
   },
 },
 ```

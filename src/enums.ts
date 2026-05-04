@@ -84,6 +84,8 @@ export enum ReplicationInstanceClass {
   // C7i — compute optimized (latest generation)
   C7I_LARGE = 'dms.c7i.large',
   C7I_XLARGE = 'dms.c7i.xlarge',
+
+  // X7i — compute optimized (latest generation, larger sizes)
   X7I_2XLARGE = 'dms.x7i.2xlarge',
   X7I_4XLARGE = 'dms.x7i.4xlarge',
   X7I_8XLARGE = 'dms.x7i.8xlarge',
@@ -176,14 +178,6 @@ export enum KafkaSecurityProtocol {
   SSL = 'ssl',
   SASL_SSL = 'sasl-ssl',
   SSL_AUTHENTICATION = 'ssl-authentication',
-}
-
-/**
- * SASL mechanism for Kafka SASL_SSL connections.
- */
-export enum KafkaSaslMechanism {
-  SCRAM_SHA_512 = 'scram-sha-512',
-  PLAIN = 'plain',
 }
 
 /**
