@@ -102,7 +102,7 @@ export interface DmsMigrationPipelineProps {
 
   /**
    * Replication instance class.
-   * @default ReplicationInstanceClass.R5_LARGE
+   * @default ReplicationInstanceClass.R6I_LARGE
    */
   readonly replicationInstanceClass?: ReplicationInstanceClass;
 
@@ -120,7 +120,7 @@ export interface DmsMigrationPipelineProps {
 
   /**
    * Engine version for the replication instance.
-   * @default "3.5.3"
+   * @default latest version available in the region (chosen by DMS)
    */
   readonly engineVersion?: string;
 

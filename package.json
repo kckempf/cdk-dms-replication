@@ -1,6 +1,7 @@
 {
   "name": "cdk-dms-replication",
   "description": "L3 CDK Constructs for Amazon Database Migration Service (DMS) — pattern construct bundling replication instance, endpoints, and tasks with secure defaults.",
+  "homepage": "https://github.com/kckempf/cdk-dms-replication#readme",
   "repository": {
     "type": "git",
     "url": "https://github.com/kckempf/cdk-dms-replication.git"

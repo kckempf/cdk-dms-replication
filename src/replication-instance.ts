@@ -9,7 +9,7 @@ import { ReplicationInstanceClass } from './enums';
 export interface DmsReplicationInstanceProps {
   /**
    * Instance class for the replication instance.
-   * @default ReplicationInstanceClass.R5_LARGE
+   * @default ReplicationInstanceClass.R6I_LARGE
    */
   readonly replicationInstanceClass?: ReplicationInstanceClass;
 
@@ -69,7 +69,7 @@ export interface DmsReplicationInstanceProps {
 
   /**
    * Replication engine version.
-   * @default "3.5.3"
+   * @default latest version available in the region (chosen by DMS)
    */
   readonly engineVersion?: string;
 
@@ -162,10 +162,10 @@ export class DmsReplicationInstance extends Construct {
       props.replicationInstanceIdentifier ?? cdk.Names.uniqueResourceName(this, { maxLength: 63 }).toLowerCase();
 
     this.cfnReplicationInstance = new dms.CfnReplicationInstance(this, 'Resource', {
-      replicationInstanceClass: props.replicationInstanceClass ?? ReplicationInstanceClass.R5_LARGE,
+      replicationInstanceClass: props.replicationInstanceClass ?? ReplicationInstanceClass.R6I_LARGE,
       replicationInstanceIdentifier: instanceIdentifier,
       allocatedStorage: props.allocatedStorage ?? 100,
-      engineVersion: props.engineVersion ?? '3.5.3',
+      engineVersion: props.engineVersion,
       kmsKeyId: this.encryptionKey.keyArn,
       multiAz: props.multiAz ?? false,
       publiclyAccessible: props.publiclyAccessible ?? false,

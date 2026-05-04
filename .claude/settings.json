@@ -6,7 +6,13 @@
       "Bash(npm run *)",
       "Bash(npm version *)",
       "Bash(JSII_SILENCE_WARNING_UNTESTED_NODE_VERSION=1 npx projen compile)",
-      "Bash(JSII_SILENCE_WARNING_UNTESTED_NODE_VERSION=1 npx projen test)"
+      "Bash(JSII_SILENCE_WARNING_UNTESTED_NODE_VERSION=1 npx projen test)",
+      "WebFetch(domain:constructs.dev)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:aws.amazon.com)",
+      "Bash(grep -v \"^--$\")",
+      "Bash(node -e ' *)"
     ],
     "additionalDirectories": [
       "/Users/kevinkempf/DMSConstruct"

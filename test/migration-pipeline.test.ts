@@ -41,7 +41,7 @@ describe('DmsReplicationInstance', () => {
     const template = Template.fromStack(stack);
 
     template.hasResourceProperties('AWS::DMS::ReplicationInstance', {
-      ReplicationInstanceClass: ReplicationInstanceClass.R5_LARGE,
+      ReplicationInstanceClass: ReplicationInstanceClass.R6I_LARGE,
       AllocatedStorage: 100,
       MultiAZ: false,
       PubliclyAccessible: false,

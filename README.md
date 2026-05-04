@@ -2,6 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/cdk-dms-replication.svg)](https://badge.fury.io/js/cdk-dms-replication)
 [![PyPI version](https://badge.fury.io/py/cdk-dms-replication.svg)](https://badge.fury.io/py/cdk-dms-replication)
+[![build](https://github.com/kckempf/cdk-dms-replication/actions/workflows/build.yml/badge.svg)](https://github.com/kckempf/cdk-dms-replication/actions/workflows/build.yml)
 
 L3 CDK constructs for [Amazon Database Migration Service (DMS)](https://aws.amazon.com/dms/). Provision a complete migration pipeline — replication instance, endpoints, and task — in a few lines of code, with secure defaults and full support for all DMS-supported engines and migration patterns.
 
@@ -42,6 +43,12 @@ pip install cdk-dms-replication
 
 ```bash
 dotnet add package KcKempf.CdkDmsReplication
+```
+
+### Go
+
+```bash
+go get github.com/kckempf/cdk-dms-replication-go
 ```
 
 ---
@@ -768,7 +775,7 @@ new DmsMigrationPipeline(stack, 'Pipeline', {
 
 ## API reference
 
-Full API documentation is available in [API.md](./API.md) and on [Construct Hub](https://constructs.dev/packages/cdk-dms-replication).
+Full API documentation is available in [API.md](https://github.com/kckempf/cdk-dms-replication/blob/main/API.md) and on [Construct Hub](https://constructs.dev/packages/cdk-dms-replication).
 
 ---
 
@@ -819,6 +826,18 @@ All source engines above, plus:
 
 ---
 
+## Contributing
+
+Bug reports and pull requests are welcome. Please open an issue at [github.com/kckempf/cdk-dms-replication/issues](https://github.com/kckempf/cdk-dms-replication/issues) before starting significant work.
+
+---
+
+## Author
+
+[Kevin Kempf](https://github.com/kckempf)
+
+---
+
 ## License
 
-Apache-2.0
+Apache-2.0 — see [LICENSE](https://github.com/kckempf/cdk-dms-replication/blob/main/LICENSE)

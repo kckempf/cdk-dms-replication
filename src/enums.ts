@@ -54,12 +54,13 @@ export enum EndpointEngine {
  * @see https://docs.aws.amazon.com/dms/latest/userguide/CHAP_ReplicationInstance.Types.html
  */
 export enum ReplicationInstanceClass {
+  // T3 — burstable general purpose (up to t3.large for DMS)
   T3_MICRO = 'dms.t3.micro',
   T3_SMALL = 'dms.t3.small',
   T3_MEDIUM = 'dms.t3.medium',
   T3_LARGE = 'dms.t3.large',
-  T3_XLARGE = 'dms.t3.xlarge',
-  T3_2XLARGE = 'dms.t3.2xlarge',
+
+  // C5 — compute optimized (previous generation)
   C5_LARGE = 'dms.c5.large',
   C5_XLARGE = 'dms.c5.xlarge',
   C5_2XLARGE = 'dms.c5.2xlarge',
@@ -68,6 +69,30 @@ export enum ReplicationInstanceClass {
   C5_12XLARGE = 'dms.c5.12xlarge',
   C5_18XLARGE = 'dms.c5.18xlarge',
   C5_24XLARGE = 'dms.c5.24xlarge',
+
+  // C6i — compute optimized (current generation)
+  C6I_LARGE = 'dms.c6i.large',
+  C6I_XLARGE = 'dms.c6i.xlarge',
+  C6I_2XLARGE = 'dms.c6i.2xlarge',
+  C6I_4XLARGE = 'dms.c6i.4xlarge',
+  C6I_8XLARGE = 'dms.c6i.8xlarge',
+  C6I_12XLARGE = 'dms.c6i.12xlarge',
+  C6I_16XLARGE = 'dms.c6i.16xlarge',
+  C6I_24XLARGE = 'dms.c6i.24xlarge',
+  C6I_32XLARGE = 'dms.c6i.32xlarge',
+
+  // C7i — compute optimized (latest generation)
+  C7I_LARGE = 'dms.c7i.large',
+  C7I_XLARGE = 'dms.c7i.xlarge',
+  X7I_2XLARGE = 'dms.x7i.2xlarge',
+  X7I_4XLARGE = 'dms.x7i.4xlarge',
+  X7I_8XLARGE = 'dms.x7i.8xlarge',
+  X7I_12XLARGE = 'dms.x7i.12xlarge',
+  X7I_16XLARGE = 'dms.x7i.16xlarge',
+  X7I_24XLARGE = 'dms.x7i.24xlarge',
+  X7I_48XLARGE = 'dms.x7i.48xlarge',
+
+  // R5 — memory optimized (previous generation)
   R5_LARGE = 'dms.r5.large',
   R5_XLARGE = 'dms.r5.xlarge',
   R5_2XLARGE = 'dms.r5.2xlarge',
@@ -76,6 +101,28 @@ export enum ReplicationInstanceClass {
   R5_12XLARGE = 'dms.r5.12xlarge',
   R5_16XLARGE = 'dms.r5.16xlarge',
   R5_24XLARGE = 'dms.r5.24xlarge',
+
+  // R6i — memory optimized (current generation)
+  R6I_LARGE = 'dms.r6i.large',
+  R6I_XLARGE = 'dms.r6i.xlarge',
+  R6I_2XLARGE = 'dms.r6i.2xlarge',
+  R6I_4XLARGE = 'dms.r6i.4xlarge',
+  R6I_8XLARGE = 'dms.r6i.8xlarge',
+  R6I_12XLARGE = 'dms.r6i.12xlarge',
+  R6I_16XLARGE = 'dms.r6i.16xlarge',
+  R6I_24XLARGE = 'dms.r6i.24xlarge',
+  R6I_32XLARGE = 'dms.r6i.32xlarge',
+
+  // R7i — memory optimized (latest generation)
+  R7I_LARGE = 'dms.r7i.large',
+  R7I_XLARGE = 'dms.r7i.xlarge',
+  R7I_2XLARGE = 'dms.r7i.2xlarge',
+  R7I_4XLARGE = 'dms.r7i.4xlarge',
+  R7I_8XLARGE = 'dms.r7i.8xlarge',
+  R7I_12XLARGE = 'dms.r7i.12xlarge',
+  R7I_16XLARGE = 'dms.r7i.16xlarge',
+  R7I_24XLARGE = 'dms.r7i.24xlarge',
+  R7I_48XLARGE = 'dms.r7i.48xlarge',
 }
 
 /**
