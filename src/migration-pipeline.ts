@@ -468,15 +468,6 @@ export class DmsMigrationPipeline extends Construct {
       removalPolicy,
     });
 
-    // Ensure endpoints exist before the task is created.
-    // Only needed when the construct owns the endpoint (not when an existing
-    // endpoint ARN is passed in — CloudFormation has no resource to depend on).
-    if (this.source instanceof DmsEndpoint) {
-      this.replicationTask.cfnReplicationTask.addDependency(this.source.cfnEndpoint);
-    }
-    if (this.target instanceof DmsEndpoint) {
-      this.replicationTask.cfnReplicationTask.addDependency(this.target.cfnEndpoint);
-    }
   }
 
   // ---------------------------------------------------------------------------

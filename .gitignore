@@ -49,4 +49,6 @@ junit.xml
 .jsii
 tsconfig.json
 !/API.md
+integ/cdk.out
+.claude
 !/.projenrc.ts

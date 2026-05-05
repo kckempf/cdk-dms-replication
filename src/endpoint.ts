@@ -363,6 +363,8 @@ export class DmsEndpoint extends Construct implements IDmsEndpoint {
       secretsManagerSecretId: s.secretsManagerSecretId,
       useBcpFullLoad: s.useBcpFullLoad,
       useThirdPartyBackupDevice: s.useThirdPartyBackupDevice,
+      trimSpaceInChar: s.trimSpaceInChar,
+      tlogAccessMode: s.tlogAccessMode,
     };
   }
 

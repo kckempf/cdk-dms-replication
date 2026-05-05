@@ -76,10 +76,6 @@ export interface PostgreSqlSettings {
   readonly secretsManagerSecretId?: string;
   /** Name of the logical replication slot created for CDC. */
   readonly slotName?: string;
-  /** Enables DMS to migrate data that has the TIMESTAMP WITH TIME ZONE data type. */
-  readonly convertTimestampWithZoneToUtc?: boolean;
-  /** Maps STRING_FORMAT to VARCHAR for Babelfish endpoints. */
-  readonly mapUnboundedNumericAsString?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -108,8 +104,6 @@ export interface OracleSettings {
   readonly asmUser?: string;
   /** Semantics for char length: BYTE or CHAR. */
   readonly charLengthSemantics?: string;
-  /** Convert TIMESTAMP WITH TIME ZONE to UTC. */
-  readonly convertTimestampWithZoneToUtc?: boolean;
   /** Whether DMS uses direct path full load. */
   readonly directPathNoLog?: boolean;
   /** Whether to load in parallel using direct path. */
@@ -178,9 +172,9 @@ export interface SqlServerSettings {
   readonly useBcpFullLoad?: boolean;
   /** Use third-party backup device. */
   readonly useThirdPartyBackupDevice?: boolean;
-  /** Trim spaces from varchar/nvarchar columns. */
+  /** Trim spaces from CHAR/VARCHAR columns. */
   readonly trimSpaceInChar?: boolean;
-  /** Access mode for transaction log. */
+  /** Controls how DMS accesses the SQL Server transaction log. */
   readonly tlogAccessMode?: string;
 }
 
@@ -252,8 +246,6 @@ export interface S3Settings {
   readonly serviceAccessRoleArn: string;
   /** Whether DMS adds a column name field to CSV output. */
   readonly addColumnName?: boolean;
-  /** Whether DMS adds trailing padding characters to data. */
-  readonly addTrailingPaddingCharacter?: boolean;
   /** Include CDC inserts and updates in the target. */
   readonly cdcInsertsAndUpdates?: boolean;
   /** Include only inserts (not updates or deletes) in the target. */
@@ -290,8 +282,6 @@ export interface S3Settings {
   readonly encryptionMode?: EncryptionMode;
   /** JSON structure defining external tables (for S3 source). */
   readonly externalTableDefinition?: string;
-  /** Whether DMS generates Glue Data Catalog metadata. */
-  readonly glueCatalogGeneration?: boolean;
   /** Number of header rows to ignore in the S3 source. */
   readonly ignoreHeaderRows?: number;
   /** Whether to include the operation column for full-load rows. */
@@ -348,8 +338,6 @@ export interface RedshiftSettings {
   readonly compUpdate?: boolean;
   /** Timeout in seconds for database connections. */
   readonly connectionTimeout?: number;
-  /** The name of the Amazon Redshift data warehouse. */
-  readonly databaseName?: string;
   /** Date format for the DATEFORMAT option. */
   readonly dateFormat?: string;
   /** Whether to load empty strings as NULL. */
@@ -474,8 +462,6 @@ export interface OpenSearchSettings {
   readonly errorRetryDuration?: number;
   /** Maximum percentage of records that may fail before the task is stopped. */
   readonly fullLoadErrorPercentage?: number;
-  /** Enables DMS to migrate data from shard 0 on. */
-  readonly useNewMappingType?: boolean;
 }
 
 // ---------------------------------------------------------------------------

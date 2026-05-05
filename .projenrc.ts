@@ -49,4 +49,18 @@ const project = new awscdk.AwsCdkConstructLibrary({
   },
 });
 
+project.gitignore.addPatterns('integ/cdk.out', '.claude');
+
+project.addTask('integ', {
+  description: 'Synthesize integration sample app and lint the CloudFormation templates',
+  steps: [
+    {
+      exec: 'npx cdk synth --app "npx ts-node --project tsconfig.json integ/sample-app.ts" --output integ/cdk.out --quiet',
+    },
+    {
+      exec: 'cfn-lint integ/cdk.out/*.template.json',
+    },
+  ],
+});
+
 project.synth();

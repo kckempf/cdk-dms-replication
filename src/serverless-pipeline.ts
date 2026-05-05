@@ -460,14 +460,6 @@ export class DmsServerlessPipeline extends Construct {
       );
     }
 
-    // Ensure endpoints exist before the config is created.
-    if (this.source instanceof DmsEndpoint) {
-      this.cfnReplicationConfig.addDependency(this.source.cfnEndpoint);
-    }
-    if (this.target instanceof DmsEndpoint) {
-      this.cfnReplicationConfig.addDependency(this.target.cfnEndpoint);
-    }
-
     this.replicationConfigArn = this.cfnReplicationConfig.ref;
   }
 
