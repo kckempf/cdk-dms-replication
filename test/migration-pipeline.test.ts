@@ -1,15 +1,24 @@
 import * as cdk from 'aws-cdk-lib';
-import { Template } from 'aws-cdk-lib/assertions';
+import { Match, Template } from 'aws-cdk-lib/assertions';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import {
   DmsEndpoint,
   DmsMigrationPipeline,
   DmsReplicationInstance,
   DmsReplicationTask,
+  EncryptionMode,
   EndpointEngine,
   EndpointType,
+  KafkaSecurityProtocol,
+  MessageFormat,
   MigrationType,
+  MongoAuthMechanism,
+  MongoAuthType,
+  MongoNestingLevel,
+  PostgresCdcPlugin,
   ReplicationInstanceClass,
+  S3DataFormat,
+  SqlServerSafeguardPolicy,
   TableMappings,
   TaskSettings,
   LobMode,
@@ -86,6 +95,22 @@ describe('DmsReplicationInstance', () => {
     new DmsReplicationInstance(stack, 'RI', { vpc, multiAz: true });
     Template.fromStack(stack).hasResourceProperties('AWS::DMS::ReplicationInstance', {
       MultiAZ: true,
+    });
+  });
+
+  test('allowInboundFrom adds an ingress rule to the security group', () => {
+    const { stack, vpc } = makeStack();
+    const ri = new DmsReplicationInstance(stack, 'RI', { vpc });
+    ri.allowInboundFrom(ec2.Peer.ipv4('10.0.0.0/8'), ec2.Port.tcp(5432));
+    Template.fromStack(stack).hasResourceProperties('AWS::EC2::SecurityGroup', {
+      SecurityGroupIngress: Match.arrayWith([
+        Match.objectLike({
+          CidrIp: '10.0.0.0/8',
+          FromPort: 5432,
+          ToPort: 5432,
+          IpProtocol: 'tcp',
+        }),
+      ]),
     });
   });
 });
@@ -696,5 +721,364 @@ describe('DmsMigrationPipeline service roles', () => {
       Properties: { RoleName: 'dms-cloudwatch-logs-role' },
     });
     expect(Object.keys(cwRoles)).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// DmsEndpoint — engine-specific settings mapping
+// ---------------------------------------------------------------------------
+
+describe('DmsEndpoint engine-specific settings mapping', () => {
+  test('maps Oracle settings to CFN OracleSettings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.SOURCE,
+      engine: EndpointEngine.ORACLE,
+      serverName: 'oracle.example.com',
+      port: 1521,
+      username: 'dms',
+      password: cdk.SecretValue.unsafePlainText('pass'),
+      databaseName: 'ORCL',
+      oracleSettings: {
+        addSupplementalLogging: true,
+        useLogminerReader: true,
+        archivedLogDestId: 1,
+        parallelAsmReadThreads: 2,
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      OracleSettings: {
+        AddSupplementalLogging: true,
+        UseLogminerReader: true,
+        ArchivedLogDestId: 1,
+        ParallelAsmReadThreads: 2,
+      },
+    });
+  });
+
+  test('maps SQL Server settings to CFN MicrosoftSqlServerSettings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.SOURCE,
+      engine: EndpointEngine.SQLSERVER,
+      serverName: 'sqlserver.example.com',
+      port: 1433,
+      username: 'dms',
+      password: cdk.SecretValue.unsafePlainText('pass'),
+      databaseName: 'mydb',
+      sqlServerSettings: {
+        trimSpaceInChar: true,
+        tlogAccessMode: 'BackupOnly',
+        readBackupOnly: true,
+        safeguardPolicy: SqlServerSafeguardPolicy.RELY_ON_SQL_SERVER_REPLICATION_AGENT,
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      MicrosoftSqlServerSettings: {
+        TrimSpaceInChar: true,
+        TlogAccessMode: 'BackupOnly',
+        ReadBackupOnly: true,
+        SafeguardPolicy: SqlServerSafeguardPolicy.RELY_ON_SQL_SERVER_REPLICATION_AGENT,
+      },
+    });
+  });
+
+  test('maps PostgreSQL settings to CFN PostgreSqlSettings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.SOURCE,
+      engine: EndpointEngine.POSTGRES,
+      serverName: 'pg.example.com',
+      port: 5432,
+      username: 'dms',
+      password: cdk.SecretValue.unsafePlainText('pass'),
+      databaseName: 'appdb',
+      postgreSqlSettings: {
+        captureDdls: true,
+        slotName: 'dms_slot',
+        pluginName: PostgresCdcPlugin.PG_LOGICAL,
+        heartbeatEnable: true,
+        mapBooleanAsBoolean: true,
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      PostgreSqlSettings: {
+        CaptureDdls: true,
+        SlotName: 'dms_slot',
+        PluginName: PostgresCdcPlugin.PG_LOGICAL,
+        HeartbeatEnable: true,
+        MapBooleanAsBoolean: true,
+      },
+    });
+  });
+
+  test('maps Redshift settings to CFN RedshiftSettings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.TARGET,
+      engine: EndpointEngine.REDSHIFT,
+      serverName: 'cluster.us-east-1.redshift.amazonaws.com',
+      port: 5439,
+      username: 'dms',
+      password: cdk.SecretValue.unsafePlainText('pass'),
+      databaseName: 'dev',
+      redshiftSettings: {
+        bucketName: 'staging-bucket',
+        serviceAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-rs',
+        encryptionMode: EncryptionMode.SSE_S3,
+        maxFileSize: 32768,
+        truncateColumns: true,
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      RedshiftSettings: {
+        BucketName: 'staging-bucket',
+        ServiceAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-rs',
+        EncryptionMode: EncryptionMode.SSE_S3,
+        MaxFileSize: 32768,
+        TruncateColumns: true,
+      },
+    });
+  });
+
+  test('maps S3 settings to CFN S3Settings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.TARGET,
+      engine: EndpointEngine.S3,
+      s3Settings: {
+        bucketName: 'my-bucket',
+        bucketFolder: 'cdc',
+        serviceAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-s3',
+        dataFormat: S3DataFormat.PARQUET,
+        datePartitionEnabled: true,
+        includeOpForFullLoad: true,
+        cdcInsertsAndUpdates: true,
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      S3Settings: {
+        BucketName: 'my-bucket',
+        BucketFolder: 'cdc',
+        ServiceAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-s3',
+        DataFormat: S3DataFormat.PARQUET,
+        DatePartitionEnabled: true,
+        IncludeOpForFullLoad: true,
+        CdcInsertsAndUpdates: true,
+      },
+    });
+  });
+
+  test('maps Kafka settings to CFN KafkaSettings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.TARGET,
+      engine: EndpointEngine.KAFKA,
+      kafkaSettings: {
+        broker: 'b-1.msk-cluster.abc123.kafka.us-east-1.amazonaws.com:9092',
+        topic: 'dms-topic',
+        securityProtocol: KafkaSecurityProtocol.SASL_SSL,
+        messageFormat: MessageFormat.JSON,
+        includeTransactionDetails: true,
+        noHexPrefix: true,
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      KafkaSettings: {
+        Broker: 'b-1.msk-cluster.abc123.kafka.us-east-1.amazonaws.com:9092',
+        Topic: 'dms-topic',
+        SecurityProtocol: KafkaSecurityProtocol.SASL_SSL,
+        MessageFormat: MessageFormat.JSON,
+        IncludeTransactionDetails: true,
+        NoHexPrefix: true,
+      },
+    });
+  });
+
+  test('maps OpenSearch settings to CFN ElasticsearchSettings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.TARGET,
+      engine: EndpointEngine.OPENSEARCH,
+      openSearchSettings: {
+        endpointUri: 'https://my-domain.us-east-1.es.amazonaws.com',
+        serviceAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-es',
+        errorRetryDuration: 300,
+        fullLoadErrorPercentage: 10,
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      ElasticsearchSettings: {
+        EndpointUri: 'https://my-domain.us-east-1.es.amazonaws.com',
+        ServiceAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-es',
+        ErrorRetryDuration: 300,
+        FullLoadErrorPercentage: 10,
+      },
+    });
+  });
+
+  test('maps Neptune settings to CFN NeptuneSettings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.TARGET,
+      engine: EndpointEngine.NEPTUNE,
+      neptuneSettings: {
+        s3BucketName: 'neptune-staging',
+        s3BucketFolder: 'migration',
+        serviceAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-neptune',
+        iamAuthEnabled: true,
+        maxRetryCount: 5,
+        errorRetryDuration: 300,
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      NeptuneSettings: {
+        S3BucketName: 'neptune-staging',
+        S3BucketFolder: 'migration',
+        ServiceAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-neptune',
+        IamAuthEnabled: true,
+        MaxRetryCount: 5,
+        ErrorRetryDuration: 300,
+      },
+    });
+  });
+
+  test('maps Redis settings to CFN RedisSettings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.TARGET,
+      engine: EndpointEngine.REDIS,
+      redisSettings: {
+        serverName: 'redis.abc123.cache.amazonaws.com',
+        port: 6380,
+        authType: 'auth-token',
+        authPassword: cdk.SecretValue.unsafePlainText('my-token'),
+        sslSecurityProtocol: 'ssl-encryption',
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      RedisSettings: {
+        ServerName: 'redis.abc123.cache.amazonaws.com',
+        Port: 6380,
+        AuthType: 'auth-token',
+        SslSecurityProtocol: 'ssl-encryption',
+      },
+    });
+  });
+
+  test('maps DynamoDB settings to CFN DynamoDbSettings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.TARGET,
+      engine: EndpointEngine.DYNAMODB,
+      dynamoDbSettings: {
+        serviceAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-dynamo',
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      DynamoDbSettings: {
+        ServiceAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-dynamo',
+      },
+    });
+  });
+
+  test('maps SAP ASE settings to CFN SybaseSettings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.SOURCE,
+      engine: EndpointEngine.SAP_ASE,
+      serverName: 'ase.example.com',
+      port: 5000,
+      username: 'dms',
+      password: cdk.SecretValue.unsafePlainText('pass'),
+      databaseName: 'mydb',
+      sapAseSettings: {
+        secretsManagerAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-ase',
+        secretsManagerSecretId: 'arn:aws:secretsmanager:us-east-1:123456789012:secret:ase-secret',
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      SybaseSettings: {
+        SecretsManagerAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-ase',
+        SecretsManagerSecretId: 'arn:aws:secretsmanager:us-east-1:123456789012:secret:ase-secret',
+      },
+    });
+  });
+
+  test('maps Db2 settings to CFN IbmDb2Settings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.SOURCE,
+      engine: EndpointEngine.IBM_DB2,
+      serverName: 'db2.example.com',
+      port: 50000,
+      username: 'dms',
+      password: cdk.SecretValue.unsafePlainText('pass'),
+      databaseName: 'mydb',
+      db2Settings: {
+        currentLsn: '0000:0000:0000:0000:0001',
+        setDataCaptureChanges: true,
+        maxKBytesPerRead: 64,
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      IbmDb2Settings: {
+        CurrentLsn: '0000:0000:0000:0000:0001',
+        SetDataCaptureChanges: true,
+        MaxKBytesPerRead: 64,
+      },
+    });
+  });
+
+  test('maps MongoDB settings to CFN MongoDbSettings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.SOURCE,
+      engine: EndpointEngine.MONGODB,
+      serverName: 'mongo.example.com',
+      port: 27017,
+      username: 'dms',
+      password: cdk.SecretValue.unsafePlainText('pass'),
+      mongoDbSettings: {
+        authType: MongoAuthType.PASSWORD,
+        authMechanism: MongoAuthMechanism.SCRAM_SHA_1,
+        nestingLevel: MongoNestingLevel.ONE,
+        docsToInvestigate: 1000,
+        extractDocId: true,
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      MongoDbSettings: {
+        AuthType: MongoAuthType.PASSWORD,
+        AuthMechanism: MongoAuthMechanism.SCRAM_SHA_1,
+        NestingLevel: MongoNestingLevel.ONE,
+        DocsToInvestigate: '1000',
+        ExtractDocId: 'true',
+      },
+    });
+  });
+
+  test('maps DocumentDB mongoDbSettings to CFN DocDbSettings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.SOURCE,
+      engine: EndpointEngine.DOCDB,
+      serverName: 'docdb.cluster.us-east-1.docdb.amazonaws.com',
+      port: 27017,
+      username: 'dms',
+      password: cdk.SecretValue.unsafePlainText('pass'),
+      mongoDbSettings: {
+        nestingLevel: MongoNestingLevel.ONE,
+        extractDocId: true,
+        docsToInvestigate: 500,
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      DocDbSettings: {
+        NestingLevel: MongoNestingLevel.ONE,
+        ExtractDocId: true,
+        DocsToInvestigate: 500,
+      },
+    });
   });
 });

@@ -2,10 +2,12 @@ import * as cdk from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as kms from 'aws-cdk-lib/aws-kms';
 import {
+  DmsEndpoint,
   DmsMigrationPipeline,
   DmsReplicationInstance,
   DmsServerlessPipeline,
   EndpointEngine,
+  EndpointType,
   MigrationType,
   ReplicationInstanceClass,
   TableMappings,
@@ -147,5 +149,81 @@ ri.allowInboundFrom(
   ec2.Port.tcp(5432),
   'Allow internal PostgreSQL',
 );
+
+// ---------------------------------------------------------------------------
+// Stack 5: CDC-only pipeline — SQL Server → Kinesis
+// Exercises MigrationType.CDC and cdcStartPosition, which take a different
+// code path in DmsReplicationTask than FULL_LOAD or FULL_LOAD_AND_CDC.
+// ---------------------------------------------------------------------------
+const cdcStack = new cdk.Stack(app, 'IntegCdcPipeline');
+
+const cdcVpc = new ec2.Vpc(cdcStack, 'Vpc', { maxAzs: 2, natGateways: 1 });
+
+new DmsMigrationPipeline(cdcStack, 'SqlServerToKinesis', {
+  vpc: cdcVpc,
+  migrationType: MigrationType.CDC,
+  replicationInstanceClass: ReplicationInstanceClass.R6I_LARGE,
+  sourceEndpoint: {
+    engine: EndpointEngine.SQLSERVER,
+    serverName: 'sqlserver.example.com',
+    port: 1433,
+    username: 'dms_user',
+    password: cdk.SecretValue.secretsManager('sqlserver-dms-secret'),
+    databaseName: 'mydb',
+    sqlServerSettings: {
+      readBackupOnly: true,
+      tlogAccessMode: 'BackupOnly',
+    },
+  },
+  targetEndpoint: {
+    engine: EndpointEngine.KINESIS,
+    kinesisSettings: {
+      streamArn: 'arn:aws:kinesis:us-east-1:123456789012:stream/dms-cdc-stream',
+      serviceAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-kinesis-role',
+    },
+  },
+  cdcStartPosition: '0000000000000001:00000001:00000001',
+  tableMappings: new TableMappings().includeSchema('%').toJson(),
+});
+
+// ---------------------------------------------------------------------------
+// Stack 6: Existing endpoints escape hatch — pre-created DmsEndpoint objects
+// Exercises existingSourceEndpoint / existingTargetEndpoint, which skip
+// endpoint creation inside the pipeline construct.
+// ---------------------------------------------------------------------------
+const escapeStack = new cdk.Stack(app, 'IntegExistingEndpoints');
+
+const escapeVpc = new ec2.Vpc(escapeStack, 'Vpc', { maxAzs: 2, natGateways: 1 });
+
+const existingSource = new DmsEndpoint(escapeStack, 'Source', {
+  endpointType: EndpointType.SOURCE,
+  engine: EndpointEngine.POSTGRES,
+  serverName: 'pg.example.com',
+  port: 5432,
+  username: 'dms_user',
+  password: cdk.SecretValue.secretsManager('pg-dms-secret'),
+  databaseName: 'appdb',
+  postgreSqlSettings: {
+    pluginName: 'pglogical' as any,
+    slotName: 'dms_replication_slot',
+  },
+});
+
+const existingTarget = new DmsEndpoint(escapeStack, 'Target', {
+  endpointType: EndpointType.TARGET,
+  engine: EndpointEngine.S3,
+  s3Settings: {
+    bucketName: 'dms-escape-bucket',
+    serviceAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-s3-role',
+  },
+});
+
+new DmsMigrationPipeline(escapeStack, 'Pipeline', {
+  vpc: escapeVpc,
+  migrationType: MigrationType.FULL_LOAD_AND_CDC,
+  existingSourceEndpoint: existingSource,
+  existingTargetEndpoint: existingTarget,
+  tableMappings: new TableMappings().includeSchema('public').toJson(),
+});
 
 app.synth();
