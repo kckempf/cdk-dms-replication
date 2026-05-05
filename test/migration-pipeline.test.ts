@@ -10,6 +10,8 @@ import {
   EndpointEngine,
   EndpointType,
   KafkaSecurityProtocol,
+  LobMode,
+  LoggingLevel,
   MessageFormat,
   MigrationType,
   MongoAuthMechanism,
@@ -21,7 +23,6 @@ import {
   SqlServerSafeguardPolicy,
   TableMappings,
   TaskSettings,
-  LobMode,
   ErrorAction,
   ColumnDataType,
 } from '../src';
@@ -112,6 +113,13 @@ describe('DmsReplicationInstance', () => {
         }),
       ]),
     });
+  });
+
+  test('uses provided security group instead of creating one', () => {
+    const { stack, vpc } = makeStack();
+    const sg = new ec2.SecurityGroup(stack, 'CustomSG', { vpc, description: 'custom' });
+    const ri = new DmsReplicationInstance(stack, 'RI', { vpc, securityGroups: [sg] });
+    expect(ri.securityGroup).toBe(sg);
   });
 });
 
@@ -244,6 +252,172 @@ describe('TableMappings', () => {
     expect(addCol).toBeDefined();
     expect(addCol['data-type'].type).toBe('datetime');
   });
+
+  // Selection rules
+
+  test('excludeSchema uses exclude action', () => {
+    const json = new TableMappings().excludeSchema('audit').toJson();
+    const rule = JSON.parse(json).rules[0];
+    expect(rule['rule-type']).toBe('selection');
+    expect(rule['rule-action']).toBe('exclude');
+    expect(rule['object-locator']['schema-name']).toBe('audit');
+  });
+
+  test('includeTable targets a specific table with include action', () => {
+    const json = new TableMappings().includeTable('public', 'orders').toJson();
+    const rule = JSON.parse(json).rules[0];
+    expect(rule['rule-action']).toBe('include');
+    expect(rule['object-locator']['table-name']).toBe('orders');
+  });
+
+  test('explicitTable uses explicit action', () => {
+    const json = new TableMappings().explicitTable('public', 'orders').toJson();
+    expect(JSON.parse(json).rules[0]['rule-action']).toBe('explicit');
+  });
+
+  // Schema transformations
+
+  test('toLowerCaseSchema emits convert-lowercase on schema target', () => {
+    const rule = JSON.parse(
+      new TableMappings().includeSchema('PUBLIC').toLowerCaseSchema('PUBLIC').toJson(),
+    ).rules.find((r: any) => r['rule-type'] === 'transformation');
+    expect(rule['rule-action']).toBe('convert-lowercase');
+    expect(rule['rule-target']).toBe('schema');
+  });
+
+  test('toUpperCaseSchema emits convert-uppercase on schema target', () => {
+    const rule = JSON.parse(
+      new TableMappings().includeSchema('public').toUpperCaseSchema('public').toJson(),
+    ).rules.find((r: any) => r['rule-type'] === 'transformation');
+    expect(rule['rule-action']).toBe('convert-uppercase');
+    expect(rule['rule-target']).toBe('schema');
+  });
+
+  test('addPrefixToSchema emits add-prefix with the value', () => {
+    const rule = JSON.parse(
+      new TableMappings().includeSchema('public').addPrefixToSchema('public', 'prod_').toJson(),
+    ).rules.find((r: any) => r['rule-type'] === 'transformation');
+    expect(rule['rule-action']).toBe('add-prefix');
+    expect(rule['rule-target']).toBe('schema');
+    expect(rule.value).toBe('prod_');
+  });
+
+  test('addSuffixToSchema emits add-suffix with the value', () => {
+    const rule = JSON.parse(
+      new TableMappings().includeSchema('public').addSuffixToSchema('public', '_v2').toJson(),
+    ).rules.find((r: any) => r['rule-type'] === 'transformation');
+    expect(rule['rule-action']).toBe('add-suffix');
+    expect(rule['rule-target']).toBe('schema');
+    expect(rule.value).toBe('_v2');
+  });
+
+  // Table transformations
+
+  test('renameTable emits rename on table target with new name as value', () => {
+    const rule = JSON.parse(
+      new TableMappings().includeSchema('public').renameTable('public', 'orders', 'orders_v2').toJson(),
+    ).rules.find((r: any) => r['rule-action'] === 'rename');
+    expect(rule['rule-target']).toBe('table');
+    expect(rule['object-locator']['table-name']).toBe('orders');
+    expect(rule.value).toBe('orders_v2');
+  });
+
+  test('toUpperCaseTable emits convert-uppercase on table target', () => {
+    const rule = JSON.parse(
+      new TableMappings().includeSchema('public').toUpperCaseTable('public', '%').toJson(),
+    ).rules.find((r: any) => r['rule-type'] === 'transformation');
+    expect(rule['rule-action']).toBe('convert-uppercase');
+    expect(rule['rule-target']).toBe('table');
+  });
+
+  test('addPrefixToTable emits add-prefix on table target', () => {
+    const rule = JSON.parse(
+      new TableMappings().includeSchema('public').addPrefixToTable('public', '%', 'tbl_').toJson(),
+    ).rules.find((r: any) => r['rule-type'] === 'transformation');
+    expect(rule['rule-action']).toBe('add-prefix');
+    expect(rule['rule-target']).toBe('table');
+    expect(rule.value).toBe('tbl_');
+  });
+
+  test('addSuffixToTable emits add-suffix on table target', () => {
+    const rule = JSON.parse(
+      new TableMappings().includeSchema('public').addSuffixToTable('public', '%', '_bak').toJson(),
+    ).rules.find((r: any) => r['rule-type'] === 'transformation');
+    expect(rule['rule-action']).toBe('add-suffix');
+    expect(rule['rule-target']).toBe('table');
+    expect(rule.value).toBe('_bak');
+  });
+
+  // Column transformations
+
+  test('renameColumn puts column-name in locator and new name as value', () => {
+    const rule = JSON.parse(
+      new TableMappings().includeSchema('public').renameColumn('public', 'orders', 'id', 'order_id').toJson(),
+    ).rules.find((r: any) => r['rule-type'] === 'transformation');
+    expect(rule['rule-action']).toBe('rename');
+    expect(rule['rule-target']).toBe('column');
+    expect(rule['object-locator']['column-name']).toBe('id');
+    expect(rule.value).toBe('order_id');
+  });
+
+  test('toLowerCaseColumn emits convert-lowercase on column target', () => {
+    const rule = JSON.parse(
+      new TableMappings().includeSchema('public').toLowerCaseColumn('public', 'orders', '%').toJson(),
+    ).rules.find((r: any) => r['rule-type'] === 'transformation');
+    expect(rule['rule-action']).toBe('convert-lowercase');
+    expect(rule['rule-target']).toBe('column');
+    expect(rule['object-locator']['column-name']).toBe('%');
+  });
+
+  test('toUpperCaseColumn emits convert-uppercase on column target', () => {
+    const rule = JSON.parse(
+      new TableMappings().includeSchema('public').toUpperCaseColumn('public', 'orders', '%').toJson(),
+    ).rules.find((r: any) => r['rule-type'] === 'transformation');
+    expect(rule['rule-action']).toBe('convert-uppercase');
+    expect(rule['rule-target']).toBe('column');
+  });
+
+  test('removeColumn emits remove-column with no value', () => {
+    const rule = JSON.parse(
+      new TableMappings().includeSchema('public').removeColumn('public', 'orders', 'secret_col').toJson(),
+    ).rules.find((r: any) => r['rule-type'] === 'transformation');
+    expect(rule['rule-action']).toBe('remove-column');
+    expect(rule['rule-target']).toBe('column');
+    expect(rule['object-locator']['column-name']).toBe('secret_col');
+    expect(rule.value).toBeUndefined();
+  });
+
+  test('addColumn with columnValue sets value field instead of expression', () => {
+    const rule = JSON.parse(
+      new TableMappings()
+        .includeSchema('public')
+        .addColumn('public', 'orders', {
+          columnName: 'source_system',
+          columnType: ColumnDataType.STRING,
+          columnValue: 'migration',
+        })
+        .toJson(),
+    ).rules.find((r: any) => r['rule-action'] === 'add-column');
+    expect(rule.value).toBe('migration');
+    expect(rule.expression).toBeUndefined();
+  });
+
+  test('addColumn with numeric type includes precision and scale in data-type', () => {
+    const rule = JSON.parse(
+      new TableMappings()
+        .includeSchema('public')
+        .addColumn('public', 'orders', {
+          columnName: 'amount',
+          columnType: ColumnDataType.NUMERIC,
+          columnPrecision: 10,
+          columnScale: 2,
+        })
+        .toJson(),
+    ).rules.find((r: any) => r['rule-action'] === 'add-column');
+    expect(rule['data-type'].type).toBe('numeric');
+    expect(rule['data-type'].precision).toBe(10);
+    expect(rule['data-type'].scale).toBe(2);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -287,6 +461,53 @@ describe('TaskSettings', () => {
     const parsed = JSON.parse(json);
     expect(parsed.FullLoadSettings.MaxFullLoadSubTasks).toBe(16);
   });
+
+  test('withLobMode NONE disables LOB support entirely', () => {
+    const parsed = JSON.parse(new TaskSettings().withLobMode(LobMode.NONE).toJson());
+    expect(parsed.TargetMetadata.SupportLobs).toBe(false);
+    expect(parsed.TargetMetadata.FullLobMode).toBe(false);
+    expect(parsed.TargetMetadata.LimitedSizeLobMode).toBe(false);
+  });
+
+  test('withTargetTablePrepMode sets TargetTablePrepMode', () => {
+    const parsed = JSON.parse(new TaskSettings().withTargetTablePrepMode('TRUNCATE_BEFORE_LOAD').toJson());
+    expect(parsed.FullLoadSettings.TargetTablePrepMode).toBe('TRUNCATE_BEFORE_LOAD');
+  });
+
+  test('withCommitRate sets CommitRate', () => {
+    const parsed = JSON.parse(new TaskSettings().withCommitRate(50000).toJson());
+    expect(parsed.FullLoadSettings.CommitRate).toBe(50000);
+  });
+
+  test('withRecovery sets RecoverableErrorCount and RecoverableErrorInterval', () => {
+    const parsed = JSON.parse(new TaskSettings().withRecovery(10, 30).toJson());
+    expect(parsed.ErrorBehavior.RecoverableErrorCount).toBe(10);
+    expect(parsed.ErrorBehavior.RecoverableErrorInterval).toBe(30);
+  });
+
+  test('withLoggingEnabled(false) disables CloudWatch logging', () => {
+    const parsed = JSON.parse(new TaskSettings().withLoggingEnabled(false).toJson());
+    expect(parsed.Logging.EnableLogging).toBe(false);
+  });
+
+  test('withLogging sets a named log component at the given level', () => {
+    const parsed = JSON.parse(
+      new TaskSettings().withLogging('SOURCE_UNLOAD', LoggingLevel.LOGGER_SEVERITY_DEBUG).toJson(),
+    );
+    expect(parsed.Logging.LogComponents).toHaveLength(1);
+    expect(parsed.Logging.LogComponents[0].Id).toBe('SOURCE_UNLOAD');
+    expect(parsed.Logging.LogComponents[0].Severity).toBe(LoggingLevel.LOGGER_SEVERITY_DEBUG);
+  });
+
+  test('withLogging replaces the default three-component list', () => {
+    const parsed = JSON.parse(
+      new TaskSettings()
+        .withLogging('SOURCE_UNLOAD', LoggingLevel.LOGGER_SEVERITY_DETAILED_DEBUG)
+        .withLogging('TARGET_LOAD', LoggingLevel.LOGGER_SEVERITY_WARNING)
+        .toJson(),
+    );
+    expect(parsed.Logging.LogComponents).toHaveLength(2);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -328,6 +549,66 @@ describe('DmsReplicationTask', () => {
 
     Template.fromStack(stack).hasResourceProperties('AWS::DMS::ReplicationTask', {
       MigrationType: 'full-load-and-cdc',
+    });
+  });
+
+  test('converts ISO-8601 cdcStartTime to Unix epoch seconds', () => {
+    const { stack, vpc } = makeStack();
+    const instance = new DmsReplicationInstance(stack, 'RI', { vpc });
+    const source = new DmsEndpoint(stack, 'Source', {
+      endpointType: EndpointType.SOURCE,
+      engine: EndpointEngine.MYSQL,
+      serverName: 'mysql.example.com',
+      port: 3306,
+      username: 'dms',
+      password: cdk.SecretValue.unsafePlainText('pass'),
+      databaseName: 'mydb',
+    });
+    const target = new DmsEndpoint(stack, 'Target', {
+      endpointType: EndpointType.TARGET,
+      engine: EndpointEngine.S3,
+      s3Settings: { bucketName: 'b', serviceAccessRoleArn: 'arn:aws:iam::123456789012:role/r' },
+    });
+    new DmsReplicationTask(stack, 'Task', {
+      replicationInstanceArn: instance.replicationInstanceArn,
+      sourceEndpoint: source,
+      targetEndpoint: target,
+      migrationType: MigrationType.CDC,
+      tableMappings: new TableMappings().includeSchema('%').toJson(),
+      cdcStartTime: '2024-01-15T00:00:00.000Z',
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::ReplicationTask', {
+      CdcStartTime: 1705276800,
+    });
+  });
+
+  test('accepts a numeric string cdcStartTime as raw epoch', () => {
+    const { stack, vpc } = makeStack();
+    const instance = new DmsReplicationInstance(stack, 'RI', { vpc });
+    const source = new DmsEndpoint(stack, 'Source', {
+      endpointType: EndpointType.SOURCE,
+      engine: EndpointEngine.MYSQL,
+      serverName: 'mysql.example.com',
+      port: 3306,
+      username: 'dms',
+      password: cdk.SecretValue.unsafePlainText('pass'),
+      databaseName: 'mydb',
+    });
+    const target = new DmsEndpoint(stack, 'Target', {
+      endpointType: EndpointType.TARGET,
+      engine: EndpointEngine.S3,
+      s3Settings: { bucketName: 'b', serviceAccessRoleArn: 'arn:aws:iam::123456789012:role/r' },
+    });
+    new DmsReplicationTask(stack, 'Task', {
+      replicationInstanceArn: instance.replicationInstanceArn,
+      sourceEndpoint: source,
+      targetEndpoint: target,
+      migrationType: MigrationType.CDC,
+      tableMappings: new TableMappings().includeSchema('%').toJson(),
+      cdcStartTime: '1705276800',
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::ReplicationTask', {
+      CdcStartTime: 1705276800,
     });
   });
 });
@@ -590,6 +871,21 @@ describe('DmsEndpoint engine validation', () => {
         databaseName: 'mydb',
       });
     }).not.toThrow();
+  });
+
+  test('throws for IBM Db2 z/OS used as a target', () => {
+    const { stack } = makeStack();
+    expect(() => {
+      new DmsEndpoint(stack, 'Ep', {
+        endpointType: EndpointType.TARGET,
+        engine: EndpointEngine.IBM_DB2_ZOS,
+        serverName: 'db2.example.com',
+        port: 446,
+        username: 'dms',
+        password: cdk.SecretValue.unsafePlainText('pass'),
+        databaseName: 'mydb',
+      });
+    }).toThrow("Engine 'db2-zos' is only supported as a SOURCE endpoint");
   });
 });
 

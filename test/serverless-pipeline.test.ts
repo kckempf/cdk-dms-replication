@@ -255,4 +255,29 @@ describe('DmsServerlessPipeline', () => {
       });
     }).toThrow(/sourceEndpoint.*existingSourceEndpoint.*required/);
   });
+
+  test('throws when both targetEndpoint and existingTargetEndpoint are provided', () => {
+    const { stack, vpc } = makeStack();
+    const existingTarget = {
+      endpointArn: 'arn:aws:dms:us-east-1:123456789012:endpoint:TARGET',
+    };
+    expect(() => {
+      new DmsServerlessPipeline(stack, 'SL', {
+        ...minProps(vpc),
+        existingTargetEndpoint: existingTarget,
+      });
+    }).toThrow(/targetEndpoint.*existingTargetEndpoint/);
+  });
+
+  test('throws when neither target endpoint is provided', () => {
+    const { stack, vpc } = makeStack();
+    expect(() => {
+      new DmsServerlessPipeline(stack, 'SL', {
+        vpc,
+        maxCapacityUnits: 8,
+        migrationType: MigrationType.FULL_LOAD,
+        sourceEndpoint: minProps(vpc).sourceEndpoint,
+      });
+    }).toThrow(/targetEndpoint.*existingTargetEndpoint.*required/);
+  });
 });

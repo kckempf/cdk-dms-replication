@@ -4002,7 +4002,6 @@ const openSearchSettings: OpenSearchSettings = { ... }
 | <code><a href="#cdk-dms-replication.OpenSearchSettings.property.serviceAccessRoleArn">serviceAccessRoleArn</a></code> | <code>string</code> | ARN of the IAM role that provides DMS access to OpenSearch. |
 | <code><a href="#cdk-dms-replication.OpenSearchSettings.property.errorRetryDuration">errorRetryDuration</a></code> | <code>number</code> | Number of seconds to retry on errors before failing. |
 | <code><a href="#cdk-dms-replication.OpenSearchSettings.property.fullLoadErrorPercentage">fullLoadErrorPercentage</a></code> | <code>number</code> | Maximum percentage of records that may fail before the task is stopped. |
-| <code><a href="#cdk-dms-replication.OpenSearchSettings.property.useNewMappingType">useNewMappingType</a></code> | <code>boolean</code> | Enables DMS to migrate data from shard 0 on. |
 
 ---
 
@@ -4054,18 +4053,6 @@ Maximum percentage of records that may fail before the task is stopped.
 
 ---
 
-##### `useNewMappingType`<sup>Optional</sup> <a name="useNewMappingType" id="cdk-dms-replication.OpenSearchSettings.property.useNewMappingType"></a>
-
-```typescript
-public readonly useNewMappingType: boolean;
-```
-
-- *Type:* boolean
-
-Enables DMS to migrate data from shard 0 on.
-
----
-
 ### OracleSettings <a name="OracleSettings" id="cdk-dms-replication.OracleSettings"></a>
 
 Settings for Oracle endpoints.
@@ -4092,7 +4079,6 @@ const oracleSettings: OracleSettings = { ... }
 | <code><a href="#cdk-dms-replication.OracleSettings.property.asmServer">asmServer</a></code> | <code>string</code> | ASM server address. |
 | <code><a href="#cdk-dms-replication.OracleSettings.property.asmUser">asmUser</a></code> | <code>string</code> | ASM user name. |
 | <code><a href="#cdk-dms-replication.OracleSettings.property.charLengthSemantics">charLengthSemantics</a></code> | <code>string</code> | Semantics for char length: BYTE or CHAR. |
-| <code><a href="#cdk-dms-replication.OracleSettings.property.convertTimestampWithZoneToUtc">convertTimestampWithZoneToUtc</a></code> | <code>boolean</code> | Convert TIMESTAMP WITH TIME ZONE to UTC. |
 | <code><a href="#cdk-dms-replication.OracleSettings.property.directPathNoLog">directPathNoLog</a></code> | <code>boolean</code> | Whether DMS uses direct path full load. |
 | <code><a href="#cdk-dms-replication.OracleSettings.property.directPathParallelLoad">directPathParallelLoad</a></code> | <code>boolean</code> | Whether to load in parallel using direct path. |
 | <code><a href="#cdk-dms-replication.OracleSettings.property.enableHomogenousTablespace">enableHomogenousTablespace</a></code> | <code>boolean</code> | Specifies whether Oracle homogeneous tablespace migration is enabled. |
@@ -4234,18 +4220,6 @@ public readonly charLengthSemantics: string;
 - *Type:* string
 
 Semantics for char length: BYTE or CHAR.
-
----
-
-##### `convertTimestampWithZoneToUtc`<sup>Optional</sup> <a name="convertTimestampWithZoneToUtc" id="cdk-dms-replication.OracleSettings.property.convertTimestampWithZoneToUtc"></a>
-
-```typescript
-public readonly convertTimestampWithZoneToUtc: boolean;
-```
-
-- *Type:* boolean
-
-Convert TIMESTAMP WITH TIME ZONE to UTC.
 
 ---
 
@@ -4519,7 +4493,6 @@ const postgreSqlSettings: PostgreSqlSettings = { ... }
 | --- | --- | --- |
 | <code><a href="#cdk-dms-replication.PostgreSqlSettings.property.afterConnectScript">afterConnectScript</a></code> | <code>string</code> | SQL to run after connecting. |
 | <code><a href="#cdk-dms-replication.PostgreSqlSettings.property.captureDdls">captureDdls</a></code> | <code>boolean</code> | Whether DMS captures DDL events and creates a replication slot. |
-| <code><a href="#cdk-dms-replication.PostgreSqlSettings.property.convertTimestampWithZoneToUtc">convertTimestampWithZoneToUtc</a></code> | <code>boolean</code> | Enables DMS to migrate data that has the TIMESTAMP WITH TIME ZONE data type. |
 | <code><a href="#cdk-dms-replication.PostgreSqlSettings.property.ddlArtifactsSchema">ddlArtifactsSchema</a></code> | <code>string</code> | Schema in which the operational DDL database artifacts are created. |
 | <code><a href="#cdk-dms-replication.PostgreSqlSettings.property.executeTimeout">executeTimeout</a></code> | <code>number</code> | Sets the client statement timeout for the PostgreSQL instance. |
 | <code><a href="#cdk-dms-replication.PostgreSqlSettings.property.failTasksOnLobTruncation">failTasksOnLobTruncation</a></code> | <code>boolean</code> | Whether DMS fails tasks that attempt to truncate a LOB. |
@@ -4527,7 +4500,6 @@ const postgreSqlSettings: PostgreSqlSettings = { ... }
 | <code><a href="#cdk-dms-replication.PostgreSqlSettings.property.heartbeatFrequency">heartbeatFrequency</a></code> | <code>number</code> | The number of seconds between heartbeat signal calls. |
 | <code><a href="#cdk-dms-replication.PostgreSqlSettings.property.heartbeatSchema">heartbeatSchema</a></code> | <code>string</code> | Schema to store the heartbeat table. |
 | <code><a href="#cdk-dms-replication.PostgreSqlSettings.property.mapBooleanAsBoolean">mapBooleanAsBoolean</a></code> | <code>boolean</code> | When true, maps boolean as boolean instead of varchar(5). |
-| <code><a href="#cdk-dms-replication.PostgreSqlSettings.property.mapUnboundedNumericAsString">mapUnboundedNumericAsString</a></code> | <code>boolean</code> | Maps STRING_FORMAT to VARCHAR for Babelfish endpoints. |
 | <code><a href="#cdk-dms-replication.PostgreSqlSettings.property.maxFileSize">maxFileSize</a></code> | <code>number</code> | Maximum file size (in KB) for CSV files created during full load. |
 | <code><a href="#cdk-dms-replication.PostgreSqlSettings.property.pluginName">pluginName</a></code> | <code><a href="#cdk-dms-replication.PostgresCdcPlugin">PostgresCdcPlugin</a></code> | CDC plugin to use. |
 | <code><a href="#cdk-dms-replication.PostgreSqlSettings.property.secretsManagerAccessRoleArn">secretsManagerAccessRoleArn</a></code> | <code>string</code> | ARN of the IAM role that provides access to Secrets Manager. |
@@ -4557,18 +4529,6 @@ public readonly captureDdls: boolean;
 - *Type:* boolean
 
 Whether DMS captures DDL events and creates a replication slot.
-
----
-
-##### `convertTimestampWithZoneToUtc`<sup>Optional</sup> <a name="convertTimestampWithZoneToUtc" id="cdk-dms-replication.PostgreSqlSettings.property.convertTimestampWithZoneToUtc"></a>
-
-```typescript
-public readonly convertTimestampWithZoneToUtc: boolean;
-```
-
-- *Type:* boolean
-
-Enables DMS to migrate data that has the TIMESTAMP WITH TIME ZONE data type.
 
 ---
 
@@ -4653,18 +4613,6 @@ public readonly mapBooleanAsBoolean: boolean;
 - *Type:* boolean
 
 When true, maps boolean as boolean instead of varchar(5).
-
----
-
-##### `mapUnboundedNumericAsString`<sup>Optional</sup> <a name="mapUnboundedNumericAsString" id="cdk-dms-replication.PostgreSqlSettings.property.mapUnboundedNumericAsString"></a>
-
-```typescript
-public readonly mapUnboundedNumericAsString: boolean;
-```
-
-- *Type:* boolean
-
-Maps STRING_FORMAT to VARCHAR for Babelfish endpoints.
 
 ---
 
@@ -4863,7 +4811,6 @@ const redshiftSettings: RedshiftSettings = { ... }
 | <code><a href="#cdk-dms-replication.RedshiftSettings.property.caseSensitiveNames">caseSensitiveNames</a></code> | <code>boolean</code> | Whether to enable case-sensitive column names. |
 | <code><a href="#cdk-dms-replication.RedshiftSettings.property.compUpdate">compUpdate</a></code> | <code>boolean</code> | Whether to enable automatic compression. |
 | <code><a href="#cdk-dms-replication.RedshiftSettings.property.connectionTimeout">connectionTimeout</a></code> | <code>number</code> | Timeout in seconds for database connections. |
-| <code><a href="#cdk-dms-replication.RedshiftSettings.property.databaseName">databaseName</a></code> | <code>string</code> | The name of the Amazon Redshift data warehouse. |
 | <code><a href="#cdk-dms-replication.RedshiftSettings.property.dateFormat">dateFormat</a></code> | <code>string</code> | Date format for the DATEFORMAT option. |
 | <code><a href="#cdk-dms-replication.RedshiftSettings.property.emptyAsNull">emptyAsNull</a></code> | <code>boolean</code> | Whether to load empty strings as NULL. |
 | <code><a href="#cdk-dms-replication.RedshiftSettings.property.encryptionMode">encryptionMode</a></code> | <code><a href="#cdk-dms-replication.EncryptionMode">EncryptionMode</a></code> | Encryption mode for data at rest. |
@@ -4966,18 +4913,6 @@ public readonly connectionTimeout: number;
 - *Type:* number
 
 Timeout in seconds for database connections.
-
----
-
-##### `databaseName`<sup>Optional</sup> <a name="databaseName" id="cdk-dms-replication.RedshiftSettings.property.databaseName"></a>
-
-```typescript
-public readonly databaseName: string;
-```
-
-- *Type:* string
-
-The name of the Amazon Redshift data warehouse.
 
 ---
 
@@ -5268,7 +5203,6 @@ const s3Settings: S3Settings = { ... }
 | <code><a href="#cdk-dms-replication.S3Settings.property.bucketName">bucketName</a></code> | <code>string</code> | S3 bucket name. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.serviceAccessRoleArn">serviceAccessRoleArn</a></code> | <code>string</code> | IAM role ARN that DMS uses to access the S3 bucket. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.addColumnName">addColumnName</a></code> | <code>boolean</code> | Whether DMS adds a column name field to CSV output. |
-| <code><a href="#cdk-dms-replication.S3Settings.property.addTrailingPaddingCharacter">addTrailingPaddingCharacter</a></code> | <code>boolean</code> | Whether DMS adds trailing padding characters to data. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.bucketFolder">bucketFolder</a></code> | <code>string</code> | Folder path prefix within the bucket. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.cdcInsertsAndUpdates">cdcInsertsAndUpdates</a></code> | <code>boolean</code> | Include CDC inserts and updates in the target. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.cdcInsertsOnly">cdcInsertsOnly</a></code> | <code>boolean</code> | Include only inserts (not updates or deletes) in the target. |
@@ -5288,7 +5222,6 @@ const s3Settings: S3Settings = { ... }
 | <code><a href="#cdk-dms-replication.S3Settings.property.encodingType">encodingType</a></code> | <code><a href="#cdk-dms-replication.EncodingType">EncodingType</a></code> | Encoding type for Parquet. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.encryptionMode">encryptionMode</a></code> | <code><a href="#cdk-dms-replication.EncryptionMode">EncryptionMode</a></code> | Encryption mode for data at rest in S3. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.externalTableDefinition">externalTableDefinition</a></code> | <code>string</code> | JSON structure defining external tables (for S3 source). |
-| <code><a href="#cdk-dms-replication.S3Settings.property.glueCatalogGeneration">glueCatalogGeneration</a></code> | <code>boolean</code> | Whether DMS generates Glue Data Catalog metadata. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.ignoreHeaderRows">ignoreHeaderRows</a></code> | <code>number</code> | Number of header rows to ignore in the S3 source. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.includeOpForFullLoad">includeOpForFullLoad</a></code> | <code>boolean</code> | Whether to include the operation column for full-load rows. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.maxFileSize">maxFileSize</a></code> | <code>number</code> | Maximum file size (in KB) for data files. |
@@ -5337,18 +5270,6 @@ public readonly addColumnName: boolean;
 - *Type:* boolean
 
 Whether DMS adds a column name field to CSV output.
-
----
-
-##### `addTrailingPaddingCharacter`<sup>Optional</sup> <a name="addTrailingPaddingCharacter" id="cdk-dms-replication.S3Settings.property.addTrailingPaddingCharacter"></a>
-
-```typescript
-public readonly addTrailingPaddingCharacter: boolean;
-```
-
-- *Type:* boolean
-
-Whether DMS adds trailing padding characters to data.
 
 ---
 
@@ -5581,18 +5502,6 @@ public readonly externalTableDefinition: string;
 - *Type:* string
 
 JSON structure defining external tables (for S3 source).
-
----
-
-##### `glueCatalogGeneration`<sup>Optional</sup> <a name="glueCatalogGeneration" id="cdk-dms-replication.S3Settings.property.glueCatalogGeneration"></a>
-
-```typescript
-public readonly glueCatalogGeneration: boolean;
-```
-
-- *Type:* boolean
-
-Whether DMS generates Glue Data Catalog metadata.
 
 ---
 
@@ -6033,8 +5942,8 @@ const sqlServerSettings: SqlServerSettings = { ... }
 | <code><a href="#cdk-dms-replication.SqlServerSettings.property.safeguardPolicy">safeguardPolicy</a></code> | <code><a href="#cdk-dms-replication.SqlServerSafeguardPolicy">SqlServerSafeguardPolicy</a></code> | Safeguard policy for SQL Server CDC. |
 | <code><a href="#cdk-dms-replication.SqlServerSettings.property.secretsManagerAccessRoleArn">secretsManagerAccessRoleArn</a></code> | <code>string</code> | ARN of IAM role for Secrets Manager. |
 | <code><a href="#cdk-dms-replication.SqlServerSettings.property.secretsManagerSecretId">secretsManagerSecretId</a></code> | <code>string</code> | Full ARN or name of the Secrets Manager secret. |
-| <code><a href="#cdk-dms-replication.SqlServerSettings.property.tlogAccessMode">tlogAccessMode</a></code> | <code>string</code> | Access mode for transaction log. |
-| <code><a href="#cdk-dms-replication.SqlServerSettings.property.trimSpaceInChar">trimSpaceInChar</a></code> | <code>boolean</code> | Trim spaces from varchar/nvarchar columns. |
+| <code><a href="#cdk-dms-replication.SqlServerSettings.property.tlogAccessMode">tlogAccessMode</a></code> | <code>string</code> | Controls how DMS accesses the SQL Server transaction log. |
+| <code><a href="#cdk-dms-replication.SqlServerSettings.property.trimSpaceInChar">trimSpaceInChar</a></code> | <code>boolean</code> | Trim spaces from CHAR/VARCHAR columns. |
 | <code><a href="#cdk-dms-replication.SqlServerSettings.property.useBcpFullLoad">useBcpFullLoad</a></code> | <code>boolean</code> | Use BCP full load. |
 | <code><a href="#cdk-dms-replication.SqlServerSettings.property.useThirdPartyBackupDevice">useThirdPartyBackupDevice</a></code> | <code>boolean</code> | Use third-party backup device. |
 
@@ -6132,7 +6041,7 @@ public readonly tlogAccessMode: string;
 
 - *Type:* string
 
-Access mode for transaction log.
+Controls how DMS accesses the SQL Server transaction log.
 
 ---
 
@@ -6144,7 +6053,7 @@ public readonly trimSpaceInChar: boolean;
 
 - *Type:* boolean
 
-Trim spaces from varchar/nvarchar columns.
+Trim spaces from CHAR/VARCHAR columns.
 
 ---
 
