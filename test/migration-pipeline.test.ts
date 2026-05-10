@@ -387,7 +387,7 @@ describe('TableMappings', () => {
     expect(rule.value).toBeUndefined();
   });
 
-  test('addColumn with columnValue sets value field instead of expression', () => {
+  test('addColumn with columnValue sets column name in value and wraps literal in expression', () => {
     const rule = JSON.parse(
       new TableMappings()
         .includeSchema('public')
@@ -398,8 +398,23 @@ describe('TableMappings', () => {
         })
         .toJson(),
     ).rules.find((r: any) => r['rule-action'] === 'add-column');
-    expect(rule.value).toBe('migration');
-    expect(rule.expression).toBeUndefined();
+    expect(rule.value).toBe('source_system');
+    expect(rule.expression).toBe("'migration'");
+  });
+
+  test('addColumn with columnValue escapes single quotes in the literal', () => {
+    const rule = JSON.parse(
+      new TableMappings()
+        .includeSchema('public')
+        .addColumn('public', 'orders', {
+          columnName: 'label',
+          columnType: ColumnDataType.STRING,
+          columnValue: "it's here",
+        })
+        .toJson(),
+    ).rules.find((r: any) => r['rule-action'] === 'add-column');
+    expect(rule.value).toBe('label');
+    expect(rule.expression).toBe("'it''s here'");
   });
 
   test('addColumn with numeric type includes precision and scale in data-type', () => {

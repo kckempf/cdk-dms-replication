@@ -80,12 +80,16 @@ export interface AddColumnDefinition {
   /** Scale for numeric columns. */
   readonly columnScale?: number;
   /**
-   * Constant value to populate the column with.
+   * Constant string value to populate the column with. Emitted as a
+   * single-quoted DMS expression literal — use only for string column types.
+   * For numeric or datetime types, use `expression` with an unquoted literal
+   * (e.g. `expression: '42'`).
    * Exactly one of `columnValue` or `expression` must be set.
    */
   readonly columnValue?: string;
   /**
-   * Expression (e.g. `$timestamp`) to populate the column.
+   * DMS expression to populate the column (e.g. `$timestamp`,
+   * `'ENTITY#' || $id`, or an unquoted numeric literal like `42`).
    * Exactly one of `columnValue` or `expression` must be set.
    */
   readonly expression?: string;
@@ -411,7 +415,8 @@ export class TableMappings {
     if (column.expression) {
       rule.expression = column.expression;
     } else if (column.columnValue !== undefined) {
-      rule.value = column.columnValue;
+      // DMS expression syntax: string literals use single quotes (escape ' as '')
+      rule.expression = `'${column.columnValue.replace(/'/g, "''")}'`;
     }
 
     this.rules.push(rule);
