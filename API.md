@@ -1184,8 +1184,8 @@ const addColumnDefinition: AddColumnDefinition = { ... }
 | <code><a href="#cdk-dms-replication.AddColumnDefinition.property.columnLength">columnLength</a></code> | <code>number</code> | Character length for string columns. |
 | <code><a href="#cdk-dms-replication.AddColumnDefinition.property.columnPrecision">columnPrecision</a></code> | <code>number</code> | Precision for numeric columns. |
 | <code><a href="#cdk-dms-replication.AddColumnDefinition.property.columnScale">columnScale</a></code> | <code>number</code> | Scale for numeric columns. |
-| <code><a href="#cdk-dms-replication.AddColumnDefinition.property.columnValue">columnValue</a></code> | <code>string</code> | Constant value to populate the column with. |
-| <code><a href="#cdk-dms-replication.AddColumnDefinition.property.expression">expression</a></code> | <code>string</code> | Expression (e.g. `$timestamp`) to populate the column. Exactly one of `columnValue` or `expression` must be set. |
+| <code><a href="#cdk-dms-replication.AddColumnDefinition.property.columnValue">columnValue</a></code> | <code>string</code> | Constant string value to populate the column with. |
+| <code><a href="#cdk-dms-replication.AddColumnDefinition.property.expression">expression</a></code> | <code>string</code> | DMS expression to populate the column (e.g. `$timestamp`, `'ENTITY#' \|\| $id`, or an unquoted numeric literal like `42`). Exactly one of `columnValue` or `expression` must be set. |
 
 ---
 
@@ -1257,8 +1257,12 @@ public readonly columnValue: string;
 
 - *Type:* string
 
-Constant value to populate the column with.
+Constant string value to populate the column with.
 
+Emitted as a
+single-quoted DMS expression literal — use only for string column types.
+For numeric or datetime types, use `expression` with an unquoted literal
+(e.g. `expression: '42'`).
 Exactly one of `columnValue` or `expression` must be set.
 
 ---
@@ -1271,7 +1275,7 @@ public readonly expression: string;
 
 - *Type:* string
 
-Expression (e.g. `$timestamp`) to populate the column. Exactly one of `columnValue` or `expression` must be set.
+DMS expression to populate the column (e.g. `$timestamp`, `'ENTITY#' || $id`, or an unquoted numeric literal like `42`). Exactly one of `columnValue` or `expression` must be set.
 
 ---
 
