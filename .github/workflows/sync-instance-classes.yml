@@ -51,10 +51,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: lts/*
 
@@ -62,7 +62,7 @@ jobs:
         run: npm ci
 
       - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_SYNC_ROLE_ARN }}
           aws-region: us-east-1
@@ -93,9 +93,10 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
+          git restore --staged --worktree .github/
           git add src/enums.ts
           git commit -m "chore: sync ReplicationInstanceClass enum with DMS API"
-          git push origin "$BRANCH"
+          git push --force-with-lease origin "$BRANCH"
 
           # Skip if a sync PR is already open for today
           EXISTING=$(gh pr list --head "$BRANCH" --json number --jq length)
