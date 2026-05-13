@@ -51,11 +51,11 @@ export enum EndpointEngine {
 
 /**
  * DMS replication instance class.
+ *
  * @see https://docs.aws.amazon.com/dms/latest/userguide/CHAP_ReplicationInstance.Types.html
  */
 export enum ReplicationInstanceClass {
-  // T3 — burstable general purpose (up to t3.large for DMS)
-  T3_MICRO = 'dms.t3.micro',
+  // T3 — burstable general purpose
   T3_SMALL = 'dms.t3.small',
   T3_MEDIUM = 'dms.t3.medium',
   T3_LARGE = 'dms.t3.large',
@@ -84,15 +84,13 @@ export enum ReplicationInstanceClass {
   // C7i — compute optimized (latest generation)
   C7I_LARGE = 'dms.c7i.large',
   C7I_XLARGE = 'dms.c7i.xlarge',
-
-  // X7i — compute optimized (latest generation, larger sizes)
-  X7I_2XLARGE = 'dms.x7i.2xlarge',
-  X7I_4XLARGE = 'dms.x7i.4xlarge',
-  X7I_8XLARGE = 'dms.x7i.8xlarge',
-  X7I_12XLARGE = 'dms.x7i.12xlarge',
-  X7I_16XLARGE = 'dms.x7i.16xlarge',
-  X7I_24XLARGE = 'dms.x7i.24xlarge',
-  X7I_48XLARGE = 'dms.x7i.48xlarge',
+  C7I_2XLARGE = 'dms.c7i.2xlarge',
+  C7I_4XLARGE = 'dms.c7i.4xlarge',
+  C7I_8XLARGE = 'dms.c7i.8xlarge',
+  C7I_12XLARGE = 'dms.c7i.12xlarge',
+  C7I_16XLARGE = 'dms.c7i.16xlarge',
+  C7I_24XLARGE = 'dms.c7i.24xlarge',
+  C7I_48XLARGE = 'dms.c7i.48xlarge',
 
   // R5 — memory optimized (previous generation)
   R5_LARGE = 'dms.r5.large',
