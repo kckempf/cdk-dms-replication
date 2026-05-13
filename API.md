@@ -8057,7 +8057,6 @@ DMS replication instance class.
 
 | **Name** | **Description** |
 | --- | --- |
-| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.T3_MICRO">T3_MICRO</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.T3_SMALL">T3_SMALL</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.T3_MEDIUM">T3_MEDIUM</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.T3_LARGE">T3_LARGE</a></code> | *No description.* |
@@ -8080,13 +8079,13 @@ DMS replication instance class.
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C6I_32XLARGE">C6I_32XLARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C7I_LARGE">C7I_LARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C7I_XLARGE">C7I_XLARGE</a></code> | *No description.* |
-| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.X7I_2XLARGE">X7I_2XLARGE</a></code> | *No description.* |
-| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.X7I_4XLARGE">X7I_4XLARGE</a></code> | *No description.* |
-| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.X7I_8XLARGE">X7I_8XLARGE</a></code> | *No description.* |
-| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.X7I_12XLARGE">X7I_12XLARGE</a></code> | *No description.* |
-| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.X7I_16XLARGE">X7I_16XLARGE</a></code> | *No description.* |
-| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.X7I_24XLARGE">X7I_24XLARGE</a></code> | *No description.* |
-| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.X7I_48XLARGE">X7I_48XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C7I_2XLARGE">C7I_2XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C7I_4XLARGE">C7I_4XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C7I_8XLARGE">C7I_8XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C7I_12XLARGE">C7I_12XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C7I_16XLARGE">C7I_16XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C7I_24XLARGE">C7I_24XLARGE</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.ReplicationInstanceClass.C7I_48XLARGE">C7I_48XLARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R5_LARGE">R5_LARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R5_XLARGE">R5_XLARGE</a></code> | *No description.* |
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R5_2XLARGE">R5_2XLARGE</a></code> | *No description.* |
@@ -8115,11 +8114,6 @@ DMS replication instance class.
 | <code><a href="#cdk-dms-replication.ReplicationInstanceClass.R7I_48XLARGE">R7I_48XLARGE</a></code> | *No description.* |
 
 ---
-
-##### `T3_MICRO` <a name="T3_MICRO" id="cdk-dms-replication.ReplicationInstanceClass.T3_MICRO"></a>
-
----
-
 
 ##### `T3_SMALL` <a name="T3_SMALL" id="cdk-dms-replication.ReplicationInstanceClass.T3_SMALL"></a>
 
@@ -8231,37 +8225,37 @@ DMS replication instance class.
 ---
 
 
-##### `X7I_2XLARGE` <a name="X7I_2XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.X7I_2XLARGE"></a>
+##### `C7I_2XLARGE` <a name="C7I_2XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C7I_2XLARGE"></a>
 
 ---
 
 
-##### `X7I_4XLARGE` <a name="X7I_4XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.X7I_4XLARGE"></a>
+##### `C7I_4XLARGE` <a name="C7I_4XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C7I_4XLARGE"></a>
 
 ---
 
 
-##### `X7I_8XLARGE` <a name="X7I_8XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.X7I_8XLARGE"></a>
+##### `C7I_8XLARGE` <a name="C7I_8XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C7I_8XLARGE"></a>
 
 ---
 
 
-##### `X7I_12XLARGE` <a name="X7I_12XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.X7I_12XLARGE"></a>
+##### `C7I_12XLARGE` <a name="C7I_12XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C7I_12XLARGE"></a>
 
 ---
 
 
-##### `X7I_16XLARGE` <a name="X7I_16XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.X7I_16XLARGE"></a>
+##### `C7I_16XLARGE` <a name="C7I_16XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C7I_16XLARGE"></a>
 
 ---
 
 
-##### `X7I_24XLARGE` <a name="X7I_24XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.X7I_24XLARGE"></a>
+##### `C7I_24XLARGE` <a name="C7I_24XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C7I_24XLARGE"></a>
 
 ---
 
 
-##### `X7I_48XLARGE` <a name="X7I_48XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.X7I_48XLARGE"></a>
+##### `C7I_48XLARGE` <a name="C7I_48XLARGE" id="cdk-dms-replication.ReplicationInstanceClass.C7I_48XLARGE"></a>
 
 ---
 
