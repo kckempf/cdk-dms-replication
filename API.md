@@ -349,8 +349,8 @@ Any object.
 | <code><a href="#cdk-dms-replication.DmsMigrationPipeline.property.replicationTask">replicationTask</a></code> | <code><a href="#cdk-dms-replication.DmsReplicationTask">DmsReplicationTask</a></code> | The replication task that drives the migration. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipeline.property.source">source</a></code> | <code><a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a></code> | The source endpoint used by this pipeline. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipeline.property.target">target</a></code> | <code><a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a></code> | The target endpoint used by this pipeline. |
-| <code><a href="#cdk-dms-replication.DmsMigrationPipeline.property.dmsCloudWatchRole">dmsCloudWatchRole</a></code> | <code>aws-cdk-lib.aws_iam.Role</code> | IAM role that allows DMS to write to CloudWatch Logs. |
-| <code><a href="#cdk-dms-replication.DmsMigrationPipeline.property.dmsVpcRole">dmsVpcRole</a></code> | <code>aws-cdk-lib.aws_iam.Role</code> | IAM role that allows DMS to manage VPC resources (dms-vpc-role). |
+| <code><a href="#cdk-dms-replication.DmsMigrationPipeline.property.dmsCloudWatchRole">dmsCloudWatchRole</a></code> | <code>constructs.Construct</code> | Construct wrapping the custom resources that created the `dms-cloudwatch-logs-role`. |
+| <code><a href="#cdk-dms-replication.DmsMigrationPipeline.property.dmsVpcRole">dmsVpcRole</a></code> | <code>constructs.Construct</code> | Construct wrapping the custom resources that created the `dms-vpc-role`. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipeline.property.logGroup">logGroup</a></code> | <code>aws-cdk-lib.aws_logs.LogGroup</code> | CloudWatch log group for the task (if enableCloudWatchLogs is true). |
 
 ---
@@ -418,12 +418,12 @@ The target endpoint used by this pipeline.
 ##### `dmsCloudWatchRole`<sup>Optional</sup> <a name="dmsCloudWatchRole" id="cdk-dms-replication.DmsMigrationPipeline.property.dmsCloudWatchRole"></a>
 
 ```typescript
-public readonly dmsCloudWatchRole: Role;
+public readonly dmsCloudWatchRole: Construct;
 ```
 
-- *Type:* aws-cdk-lib.aws_iam.Role
+- *Type:* constructs.Construct
 
-IAM role that allows DMS to write to CloudWatch Logs.
+Construct wrapping the custom resources that created the `dms-cloudwatch-logs-role`.
 
 `undefined` when `createDmsServiceRoles` is `false`.
 
@@ -432,12 +432,12 @@ IAM role that allows DMS to write to CloudWatch Logs.
 ##### `dmsVpcRole`<sup>Optional</sup> <a name="dmsVpcRole" id="cdk-dms-replication.DmsMigrationPipeline.property.dmsVpcRole"></a>
 
 ```typescript
-public readonly dmsVpcRole: Role;
+public readonly dmsVpcRole: Construct;
 ```
 
-- *Type:* aws-cdk-lib.aws_iam.Role
+- *Type:* constructs.Construct
 
-IAM role that allows DMS to manage VPC resources (dms-vpc-role).
+Construct wrapping the custom resources that created the `dms-vpc-role`.
 
 `undefined` when `createDmsServiceRoles` is `false`.
 
@@ -1018,8 +1018,8 @@ Any object.
 | <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.source">source</a></code> | <code><a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a></code> | The source endpoint used by this pipeline. |
 | <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.subnetGroup">subnetGroup</a></code> | <code>aws-cdk-lib.aws_dms.CfnReplicationSubnetGroup</code> | The replication subnet group created for this pipeline. |
 | <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.target">target</a></code> | <code><a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a></code> | The target endpoint used by this pipeline. |
-| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.dmsCloudWatchRole">dmsCloudWatchRole</a></code> | <code>aws-cdk-lib.aws_iam.Role</code> | IAM role that allows DMS to write to CloudWatch Logs. |
-| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.dmsVpcRole">dmsVpcRole</a></code> | <code>aws-cdk-lib.aws_iam.Role</code> | IAM role that allows DMS to manage VPC resources (dms-vpc-role). |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.dmsCloudWatchRole">dmsCloudWatchRole</a></code> | <code>constructs.Construct</code> | Construct wrapping the custom resources that created the `dms-cloudwatch-logs-role`. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.dmsVpcRole">dmsVpcRole</a></code> | <code>constructs.Construct</code> | Construct wrapping the custom resources that created the `dms-vpc-role`. |
 | <code><a href="#cdk-dms-replication.DmsServerlessPipeline.property.logGroup">logGroup</a></code> | <code>aws-cdk-lib.aws_logs.LogGroup</code> | CloudWatch log group for the replication config (if enableCloudWatchLogs is true). |
 
 ---
@@ -1123,12 +1123,12 @@ The target endpoint used by this pipeline.
 ##### `dmsCloudWatchRole`<sup>Optional</sup> <a name="dmsCloudWatchRole" id="cdk-dms-replication.DmsServerlessPipeline.property.dmsCloudWatchRole"></a>
 
 ```typescript
-public readonly dmsCloudWatchRole: Role;
+public readonly dmsCloudWatchRole: Construct;
 ```
 
-- *Type:* aws-cdk-lib.aws_iam.Role
+- *Type:* constructs.Construct
 
-IAM role that allows DMS to write to CloudWatch Logs.
+Construct wrapping the custom resources that created the `dms-cloudwatch-logs-role`.
 
 `undefined` when `createDmsServiceRoles` is `false`.
 
@@ -1137,12 +1137,12 @@ IAM role that allows DMS to write to CloudWatch Logs.
 ##### `dmsVpcRole`<sup>Optional</sup> <a name="dmsVpcRole" id="cdk-dms-replication.DmsServerlessPipeline.property.dmsVpcRole"></a>
 
 ```typescript
-public readonly dmsVpcRole: Role;
+public readonly dmsVpcRole: Construct;
 ```
 
-- *Type:* aws-cdk-lib.aws_iam.Role
+- *Type:* constructs.Construct
 
-IAM role that allows DMS to manage VPC resources (dms-vpc-role).
+Construct wrapping the custom resources that created the `dms-vpc-role`.
 
 `undefined` when `createDmsServiceRoles` is `false`.
 

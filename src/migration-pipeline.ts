@@ -1,6 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as iam from 'aws-cdk-lib/aws-iam';
 import * as kms from 'aws-cdk-lib/aws-kms';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
@@ -307,16 +306,16 @@ export class DmsMigrationPipeline extends Construct {
   readonly logGroup?: logs.LogGroup;
 
   /**
-   * IAM role that allows DMS to write to CloudWatch Logs.
+   * Construct wrapping the custom resources that created the `dms-cloudwatch-logs-role`.
    * `undefined` when `createDmsServiceRoles` is `false`.
    */
-  readonly dmsCloudWatchRole?: iam.Role;
+  readonly dmsCloudWatchRole?: Construct;
 
   /**
-   * IAM role that allows DMS to manage VPC resources (dms-vpc-role).
+   * Construct wrapping the custom resources that created the `dms-vpc-role`.
    * `undefined` when `createDmsServiceRoles` is `false`.
    */
-  readonly dmsVpcRole?: iam.Role;
+  readonly dmsVpcRole?: Construct;
 
   constructor(scope: Construct, id: string, props: DmsMigrationPipelineProps) {
     super(scope, id);
@@ -369,12 +368,11 @@ export class DmsMigrationPipeline extends Construct {
       kmsKey: props.encryptionKey,
       removalPolicy,
     });
-    // The replication instance cannot be placed in a VPC until dms-vpc-role exists.
-    // Only add the dependency when we created the role ourselves.
+    // dms-vpc-role must exist before DMS can describe VPC subnets (subnet group)
+    // or place the replication instance inside a VPC.
     if (this.dmsVpcRole) {
-      this.replicationInstance.cfnReplicationInstance.addDependency(
-        this.dmsVpcRole.node.defaultChild as cdk.CfnResource,
-      );
+      this.replicationInstance.subnetGroup.node.addDependency(this.dmsVpcRole);
+      this.replicationInstance.cfnReplicationInstance.node.addDependency(this.dmsVpcRole);
     }
 
     // -----------------------------------------------------------------------
