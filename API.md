@@ -1981,10 +1981,14 @@ public readonly createDmsServiceRoles: boolean;
 
 Whether to create the two account-level DMS service roles (`dms-vpc-role` and `dms-cloudwatch-logs-role`) required by DMS.
 
-Set this to `false` if the roles already exist in the AWS account — for
-example, because another CDK stack (or a manual deployment) already
-created them. Attempting to create roles with the same name twice in the
-same account causes a CloudFormation `EntityAlreadyExists` error.
+When `true`, the roles are created idempotently via a custom resource: if
+either role already exists in the account (created by another stack or
+manually), the existing role is silently reused and its trust policy is
+corrected if necessary. The roles are created with `RemovalPolicy.RETAIN`
+and are **not** lifecycle-managed by this stack — they will not be deleted
+when the stack is destroyed. If you require the roles to be
+lifecycle-managed, create them in a dedicated stack and set this to
+`false`, then pass cross-stack references as needed.
 
 When `false`, the construct expects the roles to already be present and
 skips creating them. The `dmsVpcRole` and `dmsCloudWatchRole` properties
@@ -2680,10 +2684,18 @@ public readonly createDmsServiceRoles: boolean;
 
 Whether to create the two account-level DMS service roles (`dms-vpc-role` and `dms-cloudwatch-logs-role`) required by DMS.
 
-Set to `false` if the roles already exist — for example, because a
-`DmsMigrationPipeline` or a prior manual deployment already created them.
-Attempting to create roles with the same name twice causes a CloudFormation
-`EntityAlreadyExists` error.
+When `true`, the roles are created idempotently via a custom resource: if
+either role already exists in the account (created by another stack or
+manually), the existing role is silently reused and its trust policy is
+corrected if necessary. The roles are created with `RemovalPolicy.RETAIN`
+and are **not** lifecycle-managed by this stack — they will not be deleted
+when the stack is destroyed. If you require the roles to be
+lifecycle-managed, create them in a dedicated stack and set this to
+`false`, then pass cross-stack references as needed.
+
+When `false`, the construct expects the roles to already be present and
+skips creating them. The `dmsVpcRole` and `dmsCloudWatchRole` properties
+will be `undefined`.
 
 ---
 
