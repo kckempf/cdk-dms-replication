@@ -930,9 +930,7 @@ describe('DmsMigrationPipeline service roles', () => {
         },
       },
     });
-    Template.fromStack(stack).hasResourceProperties('AWS::IAM::Role', {
-      RoleName: 'dms-vpc-role',
-    });
+    Template.fromStack(stack).resourceCountIs('Custom::DmsVpcRole', 1);
   });
 
   test('creates dms-cloudwatch-logs-role when logging enabled', () => {
@@ -957,9 +955,7 @@ describe('DmsMigrationPipeline service roles', () => {
         },
       },
     });
-    Template.fromStack(stack).hasResourceProperties('AWS::IAM::Role', {
-      RoleName: 'dms-cloudwatch-logs-role',
-    });
+    Template.fromStack(stack).resourceCountIs('Custom::DmsCloudWatchLogsRole', 1);
   });
 
   test('creates dms-vpc-role only once when two pipelines share a stack', () => {
@@ -993,12 +989,8 @@ describe('DmsMigrationPipeline service roles', () => {
       ...commonEndpoints,
     });
 
-    // Should be exactly one dms-vpc-role despite two pipelines
-    const template = Template.fromStack(stack);
-    const vpcRoles = template.findResources('AWS::IAM::Role', {
-      Properties: { RoleName: 'dms-vpc-role' },
-    });
-    expect(Object.keys(vpcRoles)).toHaveLength(1);
+    // Should be exactly one dms-vpc-role custom resource despite two pipelines
+    Template.fromStack(stack).resourceCountIs('Custom::DmsVpcRole', 1);
   });
 
   test('skips service role creation when createDmsServiceRoles is false', () => {
@@ -1024,14 +1016,103 @@ describe('DmsMigrationPipeline service roles', () => {
       },
     });
     const template = Template.fromStack(stack);
-    const vpcRoles = template.findResources('AWS::IAM::Role', {
-      Properties: { RoleName: 'dms-vpc-role' },
+    template.resourceCountIs('Custom::DmsVpcRole', 0);
+    template.resourceCountIs('Custom::DmsCloudWatchLogsRole', 0);
+  });
+
+  test('two stacks with createDmsServiceRoles:true synthesize without conflict', () => {
+    const app = new cdk.App();
+    const commonEndpoints = {
+      sourceEndpoint: {
+        engine: EndpointEngine.MYSQL,
+        serverName: 'mysql.example.com',
+        port: 3306,
+        username: 'dms',
+        password: cdk.SecretValue.unsafePlainText('pass'),
+        databaseName: 'mydb',
+      },
+      targetEndpoint: {
+        engine: EndpointEngine.S3,
+        s3Settings: {
+          bucketName: 'bucket',
+          serviceAccessRoleArn: 'arn:aws:iam::123456789012:role/r',
+        },
+      },
+    };
+    const stack1 = new cdk.Stack(app, 'Stack1', {
+      env: { account: '123456789012', region: 'us-east-1' },
     });
-    expect(Object.keys(vpcRoles)).toHaveLength(0);
-    const cwRoles = template.findResources('AWS::IAM::Role', {
-      Properties: { RoleName: 'dms-cloudwatch-logs-role' },
+    const vpc1 = new ec2.Vpc(stack1, 'Vpc', { maxAzs: 2 });
+    const stack2 = new cdk.Stack(app, 'Stack2', {
+      env: { account: '123456789012', region: 'us-east-1' },
     });
-    expect(Object.keys(cwRoles)).toHaveLength(0);
+    const vpc2 = new ec2.Vpc(stack2, 'Vpc', { maxAzs: 2 });
+
+    new DmsMigrationPipeline(stack1, 'Pipeline', {
+      vpc: vpc1,
+      migrationType: MigrationType.FULL_LOAD,
+      ...commonEndpoints,
+    });
+    new DmsMigrationPipeline(stack2, 'Pipeline', {
+      vpc: vpc2,
+      migrationType: MigrationType.FULL_LOAD,
+      ...commonEndpoints,
+    });
+
+    // Both stacks synthesize — each has its own idempotent custom resource.
+    // At deploy time, the second stack's createRole call silently succeeds
+    // because EntityAlreadyExists is ignored.
+    const t1 = Template.fromStack(stack1);
+    const t2 = Template.fromStack(stack2);
+    t1.resourceCountIs('Custom::DmsVpcRole', 1);
+    t2.resourceCountIs('Custom::DmsVpcRole', 1);
+  });
+
+  test('dms-vpc-role create call ignores EntityAlreadyExists', () => {
+    const { stack, vpc } = makeStack();
+    new DmsMigrationPipeline(stack, 'Pipeline', {
+      vpc,
+      migrationType: MigrationType.FULL_LOAD,
+      sourceEndpoint: {
+        engine: EndpointEngine.MYSQL,
+        serverName: 'mysql.example.com',
+        port: 3306,
+        username: 'dms',
+        password: cdk.SecretValue.unsafePlainText('pass'),
+        databaseName: 'mydb',
+      },
+      targetEndpoint: {
+        engine: EndpointEngine.S3,
+        s3Settings: { bucketName: 'bucket', serviceAccessRoleArn: 'arn:aws:iam::123456789012:role/r' },
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('Custom::DmsVpcRole', {
+      Create: Match.stringLikeRegexp('EntityAlreadyExists'),
+    });
+  });
+
+  test('dms-vpc-role is retained when the stack is destroyed', () => {
+    const { stack, vpc } = makeStack();
+    new DmsMigrationPipeline(stack, 'Pipeline', {
+      vpc,
+      migrationType: MigrationType.FULL_LOAD,
+      sourceEndpoint: {
+        engine: EndpointEngine.MYSQL,
+        serverName: 'mysql.example.com',
+        port: 3306,
+        username: 'dms',
+        password: cdk.SecretValue.unsafePlainText('pass'),
+        databaseName: 'mydb',
+      },
+      targetEndpoint: {
+        engine: EndpointEngine.S3,
+        s3Settings: { bucketName: 'bucket', serviceAccessRoleArn: 'arn:aws:iam::123456789012:role/r' },
+      },
+    });
+    Template.fromStack(stack).hasResource('Custom::DmsVpcRole', {
+      DeletionPolicy: 'Retain',
+      UpdateReplacePolicy: 'Retain',
+    });
   });
 });
 

@@ -1,7 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import * as dms from 'aws-cdk-lib/aws-dms';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as iam from 'aws-cdk-lib/aws-iam';
 import * as kms from 'aws-cdk-lib/aws-kms';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
@@ -162,10 +161,18 @@ export interface DmsServerlessPipelineProps {
    * Whether to create the two account-level DMS service roles (`dms-vpc-role`
    * and `dms-cloudwatch-logs-role`) required by DMS.
    *
-   * Set to `false` if the roles already exist — for example, because a
-   * `DmsMigrationPipeline` or a prior manual deployment already created them.
-   * Attempting to create roles with the same name twice causes a CloudFormation
-   * `EntityAlreadyExists` error.
+   * When `true`, the roles are created idempotently via a custom resource: if
+   * either role already exists in the account (created by another stack or
+   * manually), the existing role is silently reused and its trust policy is
+   * corrected if necessary. The roles are created with `RemovalPolicy.RETAIN`
+   * and are **not** lifecycle-managed by this stack — they will not be deleted
+   * when the stack is destroyed. If you require the roles to be
+   * lifecycle-managed, create them in a dedicated stack and set this to
+   * `false`, then pass cross-stack references as needed.
+   *
+   * When `false`, the construct expects the roles to already be present and
+   * skips creating them. The `dmsVpcRole` and `dmsCloudWatchRole` properties
+   * will be `undefined`.
    *
    * @default true
    */
@@ -258,16 +265,16 @@ export class DmsServerlessPipeline extends Construct {
   readonly logGroup?: logs.LogGroup;
 
   /**
-   * IAM role that allows DMS to write to CloudWatch Logs.
+   * Construct wrapping the custom resources that created the `dms-cloudwatch-logs-role`.
    * `undefined` when `createDmsServiceRoles` is `false`.
    */
-  readonly dmsCloudWatchRole?: iam.Role;
+  readonly dmsCloudWatchRole?: Construct;
 
   /**
-   * IAM role that allows DMS to manage VPC resources (dms-vpc-role).
+   * Construct wrapping the custom resources that created the `dms-vpc-role`.
    * `undefined` when `createDmsServiceRoles` is `false`.
    */
-  readonly dmsVpcRole?: iam.Role;
+  readonly dmsVpcRole?: Construct;
 
   constructor(scope: Construct, id: string, props: DmsServerlessPipelineProps) {
     super(scope, id);
@@ -453,11 +460,11 @@ export class DmsServerlessPipeline extends Construct {
     });
     this.cfnReplicationConfig.applyRemovalPolicy(removalPolicy);
 
-    // The replication config cannot be placed in a VPC until dms-vpc-role exists.
+    // dms-vpc-role must exist before DMS can describe VPC subnets (subnet group)
+    // or place the replication config inside a VPC.
     if (this.dmsVpcRole) {
-      this.cfnReplicationConfig.addDependency(
-        this.dmsVpcRole.node.defaultChild as cdk.CfnResource,
-      );
+      this.subnetGroup.node.addDependency(this.dmsVpcRole);
+      this.cfnReplicationConfig.node.addDependency(this.dmsVpcRole);
     }
 
     this.replicationConfigArn = this.cfnReplicationConfig.ref;

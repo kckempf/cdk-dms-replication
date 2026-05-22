@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
-import { Template } from 'aws-cdk-lib/assertions';
+import { Match, Template } from 'aws-cdk-lib/assertions';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import {
   DmsMigrationPipeline,
@@ -92,8 +92,8 @@ describe('DmsServerlessPipeline', () => {
     new DmsServerlessPipeline(stack, 'SL', minProps(vpc));
     const template = Template.fromStack(stack);
 
-    template.hasResourceProperties('AWS::IAM::Role', { RoleName: 'dms-vpc-role' });
-    template.hasResourceProperties('AWS::IAM::Role', { RoleName: 'dms-cloudwatch-logs-role' });
+    template.resourceCountIs('Custom::DmsVpcRole', 1);
+    template.resourceCountIs('Custom::DmsCloudWatchLogsRole', 1);
   });
 
   test('skips IAM role creation when createDmsServiceRoles is false', () => {
@@ -103,10 +103,8 @@ describe('DmsServerlessPipeline', () => {
       createDmsServiceRoles: false,
     });
     const template = Template.fromStack(stack);
-    const roles = template.findResources('AWS::IAM::Role');
-    const roleNames = Object.values(roles).map((r: any) => r.Properties?.RoleName);
-    expect(roleNames).not.toContain('dms-vpc-role');
-    expect(roleNames).not.toContain('dms-cloudwatch-logs-role');
+    template.resourceCountIs('Custom::DmsVpcRole', 0);
+    template.resourceCountIs('Custom::DmsCloudWatchLogsRole', 0);
   });
 
   test('omits log group when enableCloudWatchLogs is false', () => {
@@ -187,12 +185,38 @@ describe('DmsServerlessPipeline', () => {
     });
     new DmsServerlessPipeline(stack, 'SL', minProps(vpc));
 
-    const template = Template.fromStack(stack);
-    const roles = template.findResources('AWS::IAM::Role');
-    const vpcRoles = Object.values(roles).filter(
-      (r: any) => r.Properties?.RoleName === 'dms-vpc-role',
-    );
-    expect(vpcRoles).toHaveLength(1);
+    Template.fromStack(stack).resourceCountIs('Custom::DmsVpcRole', 1);
+  });
+
+  test('two stacks with createDmsServiceRoles:true synthesize without conflict', () => {
+    const app = new cdk.App();
+    const stack1 = new cdk.Stack(app, 'Stack1', { env: { account: '123456789012', region: 'us-east-1' } });
+    const vpc1 = new ec2.Vpc(stack1, 'Vpc', { maxAzs: 2 });
+    const stack2 = new cdk.Stack(app, 'Stack2', { env: { account: '123456789012', region: 'us-east-1' } });
+    const vpc2 = new ec2.Vpc(stack2, 'Vpc', { maxAzs: 2 });
+
+    new DmsServerlessPipeline(stack1, 'SL', minProps(vpc1));
+    new DmsServerlessPipeline(stack2, 'SL', minProps(vpc2));
+
+    Template.fromStack(stack1).resourceCountIs('Custom::DmsVpcRole', 1);
+    Template.fromStack(stack2).resourceCountIs('Custom::DmsVpcRole', 1);
+  });
+
+  test('dms-vpc-role create call ignores EntityAlreadyExists', () => {
+    const { stack, vpc } = makeStack();
+    new DmsServerlessPipeline(stack, 'SL', minProps(vpc));
+    Template.fromStack(stack).hasResourceProperties('Custom::DmsVpcRole', {
+      Create: Match.stringLikeRegexp('EntityAlreadyExists'),
+    });
+  });
+
+  test('dms-vpc-role is retained when the stack is destroyed', () => {
+    const { stack, vpc } = makeStack();
+    new DmsServerlessPipeline(stack, 'SL', minProps(vpc));
+    Template.fromStack(stack).hasResource('Custom::DmsVpcRole', {
+      DeletionPolicy: 'Retain',
+      UpdateReplacePolicy: 'Retain',
+    });
   });
 
   // -------------------------------------------------------------------------

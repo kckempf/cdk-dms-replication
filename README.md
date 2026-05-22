@@ -862,7 +862,7 @@ All source engines above, plus:
 - Grant DMS only the minimum IAM permissions required for each target engine.
 - For CDC with PostgreSQL, the replication user needs the `rds_replication` role (RDS) or `REPLICATION` privilege (self-managed).
 - For CDC with Oracle, supplemental logging must be enabled on the source database.
-- **`dms-vpc-role` and `dms-cloudwatch-logs-role`** are account-level IAM roles created automatically by this construct the first time a pipeline is deployed. Subsequent pipelines in the same account reuse the existing roles. If you manage these roles outside of CDK, import them via your stack before deploying.
+- **`dms-vpc-role` and `dms-cloudwatch-logs-role`** are account-level IAM roles required by DMS. When `createDmsServiceRoles` is `true` (the default), they are created idempotently via a custom resource — if they already exist in the account (created by another stack or manually), the existing roles are silently reused and their trust policies corrected if necessary. The roles are created with `RemovalPolicy.RETAIN` and are **not** lifecycle-managed by the deploying stack; they will not be deleted when the stack is destroyed. If you require the roles to be lifecycle-managed, create them in a dedicated stack and set `createDmsServiceRoles: false`.
 
 ---
 
