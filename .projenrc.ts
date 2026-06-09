@@ -47,6 +47,13 @@ const project = new awscdk.AwsCdkConstructLibrary({
     gitUserName: 'kckempf',
     gitUserEmail: 'kckempf@gmail.com',
   },
+
+  // One-shot override to force a minor bump from 0.1.x → 0.2.0.
+  // commit-and-tag-version only does patch bumps pre-1.0 by default.
+  // Remove this in the follow-up PR after v0.2.0 is released.
+  versionrcOptions: {
+    releaseAs: '0.2.0',
+  },
 });
 
 project.gitignore.addPatterns('integ/cdk.out', '.claude', '.DS_Store');
