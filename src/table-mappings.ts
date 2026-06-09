@@ -50,6 +50,13 @@ export enum RuleObjectLocator {
   INDEX_TABLESPACE = 'index-tablespace',
 }
 
+/** DynamoDB attribute sub-type for object-mapping rules. */
+export enum DynamoDbAttributeSubType {
+  STRING = 'string',
+  NUMBER = 'number',
+  BINARY = 'binary',
+}
+
 /** Data type for added columns. */
 export enum ColumnDataType {
   STRING = 'string',
@@ -100,6 +107,70 @@ export interface RuleObjectLocatorValue {
   readonly schemaName: string;
   readonly tableName?: string;
   readonly columnName?: string;
+}
+
+/**
+ * Mapping from a source column (or DMS expression) to a DynamoDB partition or
+ * sort key attribute. Exactly one of `sourceColumn` or `value` must be set.
+ */
+export interface DynamoDbKeyMapping {
+  /**
+   * Name of a single column on the relational source. The builder wraps this
+   * in the DMS expression `${sourceColumn}`. Mutually exclusive with `value`.
+   */
+  readonly sourceColumn?: string;
+  /**
+   * Raw DMS value expression, used verbatim. Use this for composite keys or
+   * other expressions like `'CUSTOMER#${customer_id}'`. Mutually exclusive
+   * with `sourceColumn`.
+   */
+  readonly value?: string;
+  /** Name of the partition/sort key attribute on the DynamoDB target item. */
+  readonly targetAttributeName: string;
+  /** DynamoDB attribute sub-type (`string`, `number`, or `binary`). */
+  readonly attributeSubType: DynamoDbAttributeSubType;
+}
+
+/**
+ * Mapping from a source column (or DMS expression) to a non-key attribute on
+ * the DynamoDB target. Exactly one of `sourceColumn` or `value` must be set.
+ * Source columns not listed in `attributeMappings` or `excludeColumns` pass
+ * through with the source column name.
+ */
+export interface DynamoDbAttributeMapping {
+  /**
+   * Name of a single column on the relational source. The builder wraps this
+   * in the DMS expression `${sourceColumn}`. Mutually exclusive with `value`.
+   */
+  readonly sourceColumn?: string;
+  /**
+   * Raw DMS value expression, used verbatim. Use this for composite values or
+   * other expressions like `'STATUS#${status}'`. Mutually exclusive with
+   * `sourceColumn`.
+   */
+  readonly value?: string;
+  /** Name of the attribute on the DynamoDB target item. */
+  readonly targetAttributeName: string;
+  /** DynamoDB attribute sub-type (`string`, `number`, or `binary`). */
+  readonly attributeSubType: DynamoDbAttributeSubType;
+}
+
+/** Options for `TableMappings.mapToDynamoDb`. */
+export interface DynamoDbObjectMappingOptions {
+  /** Name of the target DynamoDB table. */
+  readonly targetTableName: string;
+  /** Mapping for the DynamoDB partition (hash) key. Required. */
+  readonly partitionKey: DynamoDbKeyMapping;
+  /** Mapping for the DynamoDB sort (range) key. Optional. */
+  readonly sortKey?: DynamoDbKeyMapping;
+  /** Source columns to exclude from the migrated item. */
+  readonly excludeColumns?: string[];
+  /**
+   * Additional column-to-attribute mappings. Use this to rename non-key
+   * columns or change their DynamoDB sub-type. Columns not listed here pass
+   * through with the source column name.
+   */
+  readonly attributeMappings?: DynamoDbAttributeMapping[];
 }
 
 /** Represents a single, fully built rule in the table-mappings JSON. */
@@ -429,6 +500,144 @@ export class TableMappings {
     if (column.columnPrecision !== undefined) dt.precision = column.columnPrecision;
     if (column.columnScale !== undefined) dt.scale = column.columnScale;
     return dt;
+  }
+
+  // -------------------------------------------------------------------------
+  // DynamoDB object mapping
+  // -------------------------------------------------------------------------
+
+  /**
+   * Map a relational source table to a DynamoDB target table.
+   *
+   * Emits a DMS `object-mapping` rule with `rule-action: map-record-to-record`.
+   * DMS requires this rule type when the target endpoint is DynamoDB; the
+   * partition key (and optional sort key) tell DMS how to build the item key
+   * from source columns.
+   *
+   * Source columns not listed in `attributeMappings` or `excludeColumns` are
+   * migrated with the source column name as the attribute name.
+   *
+   * For each key or attribute mapping, set either `sourceColumn` (a single
+   * column wrapped as `${col}`) or `value` (a raw DMS expression, e.g.
+   * `'CUSTOMER#${customer_id}'` for composite keys). Exactly one is required.
+   *
+   * Calling this method twice with the same `schemaName`/`tableName` emits two
+   * separate rules; DMS will reject duplicate object-mapping rules at deploy
+   * time. Call it once per source table.
+   *
+   * @example
+   * const mappings = new TableMappings()
+   *   .includeTable('public', 'orders')
+   *   .mapToDynamoDb('public', 'orders', {
+   *     targetTableName: 'Orders',
+   *     // Composite partition key from a literal prefix + source column:
+   *     partitionKey: {
+   *       value: 'CUSTOMER#${customer_id}',
+   *       targetAttributeName: 'PK',
+   *       attributeSubType: DynamoDbAttributeSubType.STRING,
+   *     },
+   *     // Bare source column for the sort key:
+   *     sortKey: {
+   *       sourceColumn: 'created_at',
+   *       targetAttributeName: 'CreatedAt',
+   *       attributeSubType: DynamoDbAttributeSubType.STRING,
+   *     },
+   *     excludeColumns: ['internal_flag'],
+   *     attributeMappings: [
+   *       {
+   *         sourceColumn: 'customer_id',
+   *         targetAttributeName: 'CustomerId',
+   *         attributeSubType: DynamoDbAttributeSubType.STRING,
+   *       },
+   *     ],
+   *   })
+   *   .toJson();
+   */
+  mapToDynamoDb(
+    schemaName: string,
+    tableName: string,
+    options: DynamoDbObjectMappingOptions,
+  ): TableMappings {
+    const excluded = new Set(options.excludeColumns ?? []);
+    this.checkNotExcluded(options.partitionKey, excluded);
+    if (options.sortKey) {
+      this.checkNotExcluded(options.sortKey, excluded);
+    }
+    for (const mapping of options.attributeMappings ?? []) {
+      this.checkNotExcluded(mapping, excluded);
+    }
+
+    const id = this.nextId++;
+
+    const attributeMappings: Record<string, string>[] = [
+      this.buildAttributeMapping(options.partitionKey),
+    ];
+    if (options.sortKey) {
+      attributeMappings.push(this.buildAttributeMapping(options.sortKey));
+    }
+    if (options.attributeMappings) {
+      for (const mapping of options.attributeMappings) {
+        attributeMappings.push(this.buildAttributeMapping(mapping));
+      }
+    }
+
+    const mappingParameters: Record<string, unknown> = {
+      'partition-key-name': options.partitionKey.targetAttributeName,
+    };
+    if (options.sortKey) {
+      mappingParameters['sort-key-name'] = options.sortKey.targetAttributeName;
+    }
+    if (options.excludeColumns && options.excludeColumns.length > 0) {
+      mappingParameters['exclude-columns'] = options.excludeColumns;
+    }
+    mappingParameters['attribute-mappings'] = attributeMappings;
+
+    this.rules.push({
+      'rule-type': 'object-mapping',
+      'rule-id': String(id),
+      'rule-name': `${id}`,
+      'rule-action': 'map-record-to-record',
+      'object-locator': {
+        'schema-name': schemaName,
+        'table-name': tableName,
+      },
+      'target-table-name': options.targetTableName,
+      'mapping-parameters': mappingParameters,
+    });
+    return this;
+  }
+
+  private checkNotExcluded(
+    mapping: DynamoDbKeyMapping | DynamoDbAttributeMapping,
+    excluded: Set<string>,
+  ): void {
+    if (mapping.sourceColumn !== undefined && excluded.has(mapping.sourceColumn)) {
+      throw new Error(
+        `DynamoDB attribute mapping for '${mapping.targetAttributeName}' uses ` +
+        `sourceColumn '${mapping.sourceColumn}', which also appears in ` +
+        'excludeColumns. Remove it from one or the other.',
+      );
+    }
+  }
+
+  private buildAttributeMapping(
+    mapping: DynamoDbKeyMapping | DynamoDbAttributeMapping,
+  ): Record<string, string> {
+    const hasSource = mapping.sourceColumn !== undefined;
+    const hasValue = mapping.value !== undefined;
+    if (hasSource === hasValue) {
+      throw new Error(
+        `DynamoDB attribute mapping for '${mapping.targetAttributeName}': ` +
+        'exactly one of sourceColumn or value must be set.',
+      );
+    }
+    const value = hasValue ? mapping.value! : `\${${mapping.sourceColumn}}`;
+    return {
+      'target-attribute-name': mapping.targetAttributeName,
+      'attribute-type': 'scalar',
+      'attribute-sub-type': mapping.attributeSubType,
+      'value': value,
+    };
   }
 
   private addTransformationRule(

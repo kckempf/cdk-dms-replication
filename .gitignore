@@ -51,4 +51,5 @@ tsconfig.json
 !/API.md
 integ/cdk.out
 .claude
+.DS_Store
 !/.projenrc.ts

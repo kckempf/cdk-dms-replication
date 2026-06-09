@@ -2916,6 +2916,260 @@ Subnet selection for the replication subnet group.
 
 ---
 
+### DynamoDbAttributeMapping <a name="DynamoDbAttributeMapping" id="cdk-dms-replication.DynamoDbAttributeMapping"></a>
+
+Mapping from a source column (or DMS expression) to a non-key attribute on the DynamoDB target.
+
+Exactly one of `sourceColumn` or `value` must be set.
+Source columns not listed in `attributeMappings` or `excludeColumns` pass
+through with the source column name.
+
+#### Initializer <a name="Initializer" id="cdk-dms-replication.DynamoDbAttributeMapping.Initializer"></a>
+
+```typescript
+import { DynamoDbAttributeMapping } from 'cdk-dms-replication'
+
+const dynamoDbAttributeMapping: DynamoDbAttributeMapping = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk-dms-replication.DynamoDbAttributeMapping.property.attributeSubType">attributeSubType</a></code> | <code><a href="#cdk-dms-replication.DynamoDbAttributeSubType">DynamoDbAttributeSubType</a></code> | DynamoDB attribute sub-type (`string`, `number`, or `binary`). |
+| <code><a href="#cdk-dms-replication.DynamoDbAttributeMapping.property.targetAttributeName">targetAttributeName</a></code> | <code>string</code> | Name of the attribute on the DynamoDB target item. |
+| <code><a href="#cdk-dms-replication.DynamoDbAttributeMapping.property.sourceColumn">sourceColumn</a></code> | <code>string</code> | Name of a single column on the relational source. |
+| <code><a href="#cdk-dms-replication.DynamoDbAttributeMapping.property.value">value</a></code> | <code>string</code> | Raw DMS value expression, used verbatim. |
+
+---
+
+##### `attributeSubType`<sup>Required</sup> <a name="attributeSubType" id="cdk-dms-replication.DynamoDbAttributeMapping.property.attributeSubType"></a>
+
+```typescript
+public readonly attributeSubType: DynamoDbAttributeSubType;
+```
+
+- *Type:* <a href="#cdk-dms-replication.DynamoDbAttributeSubType">DynamoDbAttributeSubType</a>
+
+DynamoDB attribute sub-type (`string`, `number`, or `binary`).
+
+---
+
+##### `targetAttributeName`<sup>Required</sup> <a name="targetAttributeName" id="cdk-dms-replication.DynamoDbAttributeMapping.property.targetAttributeName"></a>
+
+```typescript
+public readonly targetAttributeName: string;
+```
+
+- *Type:* string
+
+Name of the attribute on the DynamoDB target item.
+
+---
+
+##### `sourceColumn`<sup>Optional</sup> <a name="sourceColumn" id="cdk-dms-replication.DynamoDbAttributeMapping.property.sourceColumn"></a>
+
+```typescript
+public readonly sourceColumn: string;
+```
+
+- *Type:* string
+
+Name of a single column on the relational source.
+
+The builder wraps this
+in the DMS expression `${sourceColumn}`. Mutually exclusive with `value`.
+
+---
+
+##### `value`<sup>Optional</sup> <a name="value" id="cdk-dms-replication.DynamoDbAttributeMapping.property.value"></a>
+
+```typescript
+public readonly value: string;
+```
+
+- *Type:* string
+
+Raw DMS value expression, used verbatim.
+
+Use this for composite values or
+other expressions like `'STATUS#${status}'`. Mutually exclusive with
+`sourceColumn`.
+
+---
+
+### DynamoDbKeyMapping <a name="DynamoDbKeyMapping" id="cdk-dms-replication.DynamoDbKeyMapping"></a>
+
+Mapping from a source column (or DMS expression) to a DynamoDB partition or sort key attribute.
+
+Exactly one of `sourceColumn` or `value` must be set.
+
+#### Initializer <a name="Initializer" id="cdk-dms-replication.DynamoDbKeyMapping.Initializer"></a>
+
+```typescript
+import { DynamoDbKeyMapping } from 'cdk-dms-replication'
+
+const dynamoDbKeyMapping: DynamoDbKeyMapping = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk-dms-replication.DynamoDbKeyMapping.property.attributeSubType">attributeSubType</a></code> | <code><a href="#cdk-dms-replication.DynamoDbAttributeSubType">DynamoDbAttributeSubType</a></code> | DynamoDB attribute sub-type (`string`, `number`, or `binary`). |
+| <code><a href="#cdk-dms-replication.DynamoDbKeyMapping.property.targetAttributeName">targetAttributeName</a></code> | <code>string</code> | Name of the partition/sort key attribute on the DynamoDB target item. |
+| <code><a href="#cdk-dms-replication.DynamoDbKeyMapping.property.sourceColumn">sourceColumn</a></code> | <code>string</code> | Name of a single column on the relational source. |
+| <code><a href="#cdk-dms-replication.DynamoDbKeyMapping.property.value">value</a></code> | <code>string</code> | Raw DMS value expression, used verbatim. |
+
+---
+
+##### `attributeSubType`<sup>Required</sup> <a name="attributeSubType" id="cdk-dms-replication.DynamoDbKeyMapping.property.attributeSubType"></a>
+
+```typescript
+public readonly attributeSubType: DynamoDbAttributeSubType;
+```
+
+- *Type:* <a href="#cdk-dms-replication.DynamoDbAttributeSubType">DynamoDbAttributeSubType</a>
+
+DynamoDB attribute sub-type (`string`, `number`, or `binary`).
+
+---
+
+##### `targetAttributeName`<sup>Required</sup> <a name="targetAttributeName" id="cdk-dms-replication.DynamoDbKeyMapping.property.targetAttributeName"></a>
+
+```typescript
+public readonly targetAttributeName: string;
+```
+
+- *Type:* string
+
+Name of the partition/sort key attribute on the DynamoDB target item.
+
+---
+
+##### `sourceColumn`<sup>Optional</sup> <a name="sourceColumn" id="cdk-dms-replication.DynamoDbKeyMapping.property.sourceColumn"></a>
+
+```typescript
+public readonly sourceColumn: string;
+```
+
+- *Type:* string
+
+Name of a single column on the relational source.
+
+The builder wraps this
+in the DMS expression `${sourceColumn}`. Mutually exclusive with `value`.
+
+---
+
+##### `value`<sup>Optional</sup> <a name="value" id="cdk-dms-replication.DynamoDbKeyMapping.property.value"></a>
+
+```typescript
+public readonly value: string;
+```
+
+- *Type:* string
+
+Raw DMS value expression, used verbatim.
+
+Use this for composite keys or
+other expressions like `'CUSTOMER#${customer_id}'`. Mutually exclusive
+with `sourceColumn`.
+
+---
+
+### DynamoDbObjectMappingOptions <a name="DynamoDbObjectMappingOptions" id="cdk-dms-replication.DynamoDbObjectMappingOptions"></a>
+
+Options for `TableMappings.mapToDynamoDb`.
+
+#### Initializer <a name="Initializer" id="cdk-dms-replication.DynamoDbObjectMappingOptions.Initializer"></a>
+
+```typescript
+import { DynamoDbObjectMappingOptions } from 'cdk-dms-replication'
+
+const dynamoDbObjectMappingOptions: DynamoDbObjectMappingOptions = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#cdk-dms-replication.DynamoDbObjectMappingOptions.property.partitionKey">partitionKey</a></code> | <code><a href="#cdk-dms-replication.DynamoDbKeyMapping">DynamoDbKeyMapping</a></code> | Mapping for the DynamoDB partition (hash) key. |
+| <code><a href="#cdk-dms-replication.DynamoDbObjectMappingOptions.property.targetTableName">targetTableName</a></code> | <code>string</code> | Name of the target DynamoDB table. |
+| <code><a href="#cdk-dms-replication.DynamoDbObjectMappingOptions.property.attributeMappings">attributeMappings</a></code> | <code><a href="#cdk-dms-replication.DynamoDbAttributeMapping">DynamoDbAttributeMapping</a>[]</code> | Additional column-to-attribute mappings. |
+| <code><a href="#cdk-dms-replication.DynamoDbObjectMappingOptions.property.excludeColumns">excludeColumns</a></code> | <code>string[]</code> | Source columns to exclude from the migrated item. |
+| <code><a href="#cdk-dms-replication.DynamoDbObjectMappingOptions.property.sortKey">sortKey</a></code> | <code><a href="#cdk-dms-replication.DynamoDbKeyMapping">DynamoDbKeyMapping</a></code> | Mapping for the DynamoDB sort (range) key. |
+
+---
+
+##### `partitionKey`<sup>Required</sup> <a name="partitionKey" id="cdk-dms-replication.DynamoDbObjectMappingOptions.property.partitionKey"></a>
+
+```typescript
+public readonly partitionKey: DynamoDbKeyMapping;
+```
+
+- *Type:* <a href="#cdk-dms-replication.DynamoDbKeyMapping">DynamoDbKeyMapping</a>
+
+Mapping for the DynamoDB partition (hash) key.
+
+Required.
+
+---
+
+##### `targetTableName`<sup>Required</sup> <a name="targetTableName" id="cdk-dms-replication.DynamoDbObjectMappingOptions.property.targetTableName"></a>
+
+```typescript
+public readonly targetTableName: string;
+```
+
+- *Type:* string
+
+Name of the target DynamoDB table.
+
+---
+
+##### `attributeMappings`<sup>Optional</sup> <a name="attributeMappings" id="cdk-dms-replication.DynamoDbObjectMappingOptions.property.attributeMappings"></a>
+
+```typescript
+public readonly attributeMappings: DynamoDbAttributeMapping[];
+```
+
+- *Type:* <a href="#cdk-dms-replication.DynamoDbAttributeMapping">DynamoDbAttributeMapping</a>[]
+
+Additional column-to-attribute mappings.
+
+Use this to rename non-key
+columns or change their DynamoDB sub-type. Columns not listed here pass
+through with the source column name.
+
+---
+
+##### `excludeColumns`<sup>Optional</sup> <a name="excludeColumns" id="cdk-dms-replication.DynamoDbObjectMappingOptions.property.excludeColumns"></a>
+
+```typescript
+public readonly excludeColumns: string[];
+```
+
+- *Type:* string[]
+
+Source columns to exclude from the migrated item.
+
+---
+
+##### `sortKey`<sup>Optional</sup> <a name="sortKey" id="cdk-dms-replication.DynamoDbObjectMappingOptions.property.sortKey"></a>
+
+```typescript
+public readonly sortKey: DynamoDbKeyMapping;
+```
+
+- *Type:* <a href="#cdk-dms-replication.DynamoDbKeyMapping">DynamoDbKeyMapping</a>
+
+Mapping for the DynamoDB sort (range) key.
+
+Optional.
+
+---
+
 ### DynamoDbSettings <a name="DynamoDbSettings" id="cdk-dms-replication.DynamoDbSettings"></a>
 
 Settings for Amazon DynamoDB target endpoints.
@@ -6541,6 +6795,7 @@ new TableMappings()
 | <code><a href="#cdk-dms-replication.TableMappings.explicitTable">explicitTable</a></code> | Explicitly include a single table. |
 | <code><a href="#cdk-dms-replication.TableMappings.includeSchema">includeSchema</a></code> | Include all tables in a schema. |
 | <code><a href="#cdk-dms-replication.TableMappings.includeTable">includeTable</a></code> | Include a specific table (or a wildcard pattern) within a schema. |
+| <code><a href="#cdk-dms-replication.TableMappings.mapToDynamoDb">mapToDynamoDb</a></code> | Map a relational source table to a DynamoDB target table. |
 | <code><a href="#cdk-dms-replication.TableMappings.removeColumn">removeColumn</a></code> | Remove a column from a table. |
 | <code><a href="#cdk-dms-replication.TableMappings.renameColumn">renameColumn</a></code> | Rename a column in a table. |
 | <code><a href="#cdk-dms-replication.TableMappings.renameSchema">renameSchema</a></code> | Rename a schema. |
@@ -6776,6 +7031,80 @@ Use `%` for `tableName` to match all tables in the schema.
 ###### `tableName`<sup>Required</sup> <a name="tableName" id="cdk-dms-replication.TableMappings.includeTable.parameter.tableName"></a>
 
 - *Type:* string
+
+---
+
+##### `mapToDynamoDb` <a name="mapToDynamoDb" id="cdk-dms-replication.TableMappings.mapToDynamoDb"></a>
+
+```typescript
+public mapToDynamoDb(schemaName: string, tableName: string, options: DynamoDbObjectMappingOptions): TableMappings
+```
+
+Map a relational source table to a DynamoDB target table.
+
+Emits a DMS `object-mapping` rule with `rule-action: map-record-to-record`.
+DMS requires this rule type when the target endpoint is DynamoDB; the
+partition key (and optional sort key) tell DMS how to build the item key
+from source columns.
+
+Source columns not listed in `attributeMappings` or `excludeColumns` are
+migrated with the source column name as the attribute name.
+
+For each key or attribute mapping, set either `sourceColumn` (a single
+column wrapped as `${col}`) or `value` (a raw DMS expression, e.g.
+`'CUSTOMER#${customer_id}'` for composite keys). Exactly one is required.
+
+Calling this method twice with the same `schemaName`/`tableName` emits two
+separate rules; DMS will reject duplicate object-mapping rules at deploy
+time. Call it once per source table.
+
+*Example*
+
+```typescript
+const mappings = new TableMappings()
+  .includeTable('public', 'orders')
+  .mapToDynamoDb('public', 'orders', {
+    targetTableName: 'Orders',
+    // Composite partition key from a literal prefix + source column:
+    partitionKey: {
+      value: 'CUSTOMER#${customer_id}',
+      targetAttributeName: 'PK',
+      attributeSubType: DynamoDbAttributeSubType.STRING,
+    },
+    // Bare source column for the sort key:
+    sortKey: {
+      sourceColumn: 'created_at',
+      targetAttributeName: 'CreatedAt',
+      attributeSubType: DynamoDbAttributeSubType.STRING,
+    },
+    excludeColumns: ['internal_flag'],
+    attributeMappings: [
+      {
+        sourceColumn: 'customer_id',
+        targetAttributeName: 'CustomerId',
+        attributeSubType: DynamoDbAttributeSubType.STRING,
+      },
+    ],
+  })
+  .toJson();
+```
+
+
+###### `schemaName`<sup>Required</sup> <a name="schemaName" id="cdk-dms-replication.TableMappings.mapToDynamoDb.parameter.schemaName"></a>
+
+- *Type:* string
+
+---
+
+###### `tableName`<sup>Required</sup> <a name="tableName" id="cdk-dms-replication.TableMappings.mapToDynamoDb.parameter.tableName"></a>
+
+- *Type:* string
+
+---
+
+###### `options`<sup>Required</sup> <a name="options" id="cdk-dms-replication.TableMappings.mapToDynamoDb.parameter.options"></a>
+
+- *Type:* <a href="#cdk-dms-replication.DynamoDbObjectMappingOptions">DynamoDbObjectMappingOptions</a>
 
 ---
 
@@ -7447,6 +7776,35 @@ Date partition sequence for S3 date-partitioned output.
 
 
 ##### `DDMMYYYY` <a name="DDMMYYYY" id="cdk-dms-replication.DatePartitionSequence.DDMMYYYY"></a>
+
+---
+
+
+### DynamoDbAttributeSubType <a name="DynamoDbAttributeSubType" id="cdk-dms-replication.DynamoDbAttributeSubType"></a>
+
+DynamoDB attribute sub-type for object-mapping rules.
+
+#### Members <a name="Members" id="Members"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#cdk-dms-replication.DynamoDbAttributeSubType.STRING">STRING</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.DynamoDbAttributeSubType.NUMBER">NUMBER</a></code> | *No description.* |
+| <code><a href="#cdk-dms-replication.DynamoDbAttributeSubType.BINARY">BINARY</a></code> | *No description.* |
+
+---
+
+##### `STRING` <a name="STRING" id="cdk-dms-replication.DynamoDbAttributeSubType.STRING"></a>
+
+---
+
+
+##### `NUMBER` <a name="NUMBER" id="cdk-dms-replication.DynamoDbAttributeSubType.NUMBER"></a>
+
+---
+
+
+##### `BINARY` <a name="BINARY" id="cdk-dms-replication.DynamoDbAttributeSubType.BINARY"></a>
 
 ---
 

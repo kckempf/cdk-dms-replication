@@ -17,6 +17,10 @@ export {
 export {
   AddColumnDefinition,
   ColumnDataType,
+  DynamoDbAttributeMapping,
+  DynamoDbAttributeSubType,
+  DynamoDbKeyMapping,
+  DynamoDbObjectMappingOptions,
   RuleObjectLocator,
   RuleObjectLocatorValue,
   SelectionAction,

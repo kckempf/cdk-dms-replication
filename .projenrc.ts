@@ -49,7 +49,7 @@ const project = new awscdk.AwsCdkConstructLibrary({
   },
 });
 
-project.gitignore.addPatterns('integ/cdk.out', '.claude');
+project.gitignore.addPatterns('integ/cdk.out', '.claude', '.DS_Store');
 
 project.addTask('integ', {
   description: 'Synthesize integration sample app and lint the CloudFormation templates',
