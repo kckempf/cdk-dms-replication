@@ -8,10 +8,6 @@ const project = new awscdk.AwsCdkConstructLibrary({
   jsiiVersion: '~5.9.0',
   name: 'cdk-dms-replication',
   packageManager: javascript.NodePackageManager.NPM,
-  // Pinned to 0.99.72 (exact, no caret): 0.99.73/0.99.74 bundle shx@0.4.0
-  // (requires shelljs ^0.9.2) alongside shelljs@0.10.0, which breaks `npm ci`.
-  // Bump once upstream fixes https://github.com/projen/projen.
-  projenVersion: '0.99.72',
   projenrcTs: true,
   repositoryUrl: 'https://github.com/kckempf/cdk-dms-replication.git',
   homepage: 'https://github.com/kckempf/cdk-dms-replication#readme',
