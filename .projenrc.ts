@@ -47,6 +47,15 @@ const project = new awscdk.AwsCdkConstructLibrary({
     gitUserName: 'kckempf',
     gitUserEmail: 'kckempf@gmail.com',
   },
+
+  // ts-jest needs isolatedModules:true once the root tsconfig uses
+  // module:node16 (introduced when projen 0.100.x split the test
+  // tsconfig out). Without it, ts-jest skips emit and tests fail.
+  tsconfigDev: {
+    compilerOptions: {
+      isolatedModules: true,
+    },
+  },
 });
 
 project.gitignore.addPatterns('integ/cdk.out', '.claude', '.DS_Store');
