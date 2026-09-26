@@ -47,6 +47,10 @@ const project = new awscdk.AwsCdkConstructLibrary({
     moduleName: 'github.com/kckempf/cdk-dms-replication-go',
     gitUserName: 'kckempf',
     gitUserEmail: 'kckempf@gmail.com',
+    // Push via a repo-scoped SSH deploy key instead of a personal access
+    // token: deploy keys do not expire and grant write to only the Go
+    // mirror repo. Secret GO_GITHUB_DEPLOY_KEY holds the private key.
+    githubUseSsh: true,
   },
 
   // ts-jest needs isolatedModules:true once the root tsconfig uses

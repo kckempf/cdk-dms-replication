@@ -374,11 +374,18 @@ jobs:
       - name: Collect go artifact
         id: collect_go_artifact
         run: mv .repo/dist dist
+      - name: Setup GitHub deploy key
+        id: setup_github_deploy_key
+        env:
+          GITHUB_DEPLOY_KEY: ${{ secrets.GO_GITHUB_DEPLOY_KEY }}
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: ssh-agent -a ${SSH_AUTH_SOCK} && ssh-add - <<< "${GITHUB_DEPLOY_KEY}"
       - name: Release
         id: release
         env:
           GIT_USER_NAME: kckempf
           GIT_USER_EMAIL: kckempf@gmail.com
-          GITHUB_TOKEN: ${{ secrets.GO_GITHUB_TOKEN }}
+          GITHUB_USE_SSH: "true"
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
           PUBLIB_DRYRUN: ${{ inputs.dry_run }}
         run: npx '-p' 'publib@latest' 'publib-golang'
