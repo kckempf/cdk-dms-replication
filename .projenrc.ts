@@ -3,7 +3,7 @@ import { awscdk, javascript } from 'projen';
 const project = new awscdk.AwsCdkConstructLibrary({
   author: 'Kevin Kempf',
   authorAddress: 'kckempf@gmail.com',
-  cdkVersion: '2.100.0',
+  cdkVersion: '2.259.0',
   defaultReleaseBranch: 'main',
   jsiiVersion: '~5.9.0',
   name: 'cdk-dms-replication',
@@ -72,7 +72,9 @@ project.addTask('integ', {
       exec: 'npx cdk synth --app "npx ts-node --project tsconfig.json integ/sample-app.ts" --output integ/cdk.out --quiet',
     },
     {
-      exec: 'cfn-lint integ/cdk.out/*.template.json',
+      // W3005: redundant DependsOn inside CDK's own AwsCustomResource
+      // provider Lambda; not something this library controls.
+      exec: 'cfn-lint --ignore-checks W3005 -- integ/cdk.out/*.template.json',
     },
   ],
 });

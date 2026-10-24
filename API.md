@@ -1402,10 +1402,14 @@ const db2Settings: Db2Settings = { ... }
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#cdk-dms-replication.Db2Settings.property.currentLsn">currentLsn</a></code> | <code>string</code> | Current LSN as of which DMS should start reading. |
+| <code><a href="#cdk-dms-replication.Db2Settings.property.keepCsvFiles">keepCsvFiles</a></code> | <code>boolean</code> | (Target) Whether DMS keeps the .csv files it used to load data, for troubleshooting. |
+| <code><a href="#cdk-dms-replication.Db2Settings.property.loadTimeout">loadTimeout</a></code> | <code>number</code> | (Target) Time in milliseconds DMS waits before timing out a data load. |
+| <code><a href="#cdk-dms-replication.Db2Settings.property.maxFileSize">maxFileSize</a></code> | <code>number</code> | (Target) Maximum size in KB of the .csv files DMS uses to load data. |
 | <code><a href="#cdk-dms-replication.Db2Settings.property.maxKBytesPerRead">maxKBytesPerRead</a></code> | <code>number</code> | Maximum number of bytes per read operation. |
 | <code><a href="#cdk-dms-replication.Db2Settings.property.secretsManagerAccessRoleArn">secretsManagerAccessRoleArn</a></code> | <code>string</code> | ARN of IAM role for Secrets Manager. |
 | <code><a href="#cdk-dms-replication.Db2Settings.property.secretsManagerSecretId">secretsManagerSecretId</a></code> | <code>string</code> | Full ARN or name of the Secrets Manager secret. |
 | <code><a href="#cdk-dms-replication.Db2Settings.property.setDataCaptureChanges">setDataCaptureChanges</a></code> | <code>boolean</code> | Enables ongoing replication (CDC) for Db2. |
+| <code><a href="#cdk-dms-replication.Db2Settings.property.writeBufferSize">writeBufferSize</a></code> | <code>number</code> | (Target) Size in KB of the in-memory buffer DMS writes to before flushing to a .csv file. |
 
 ---
 
@@ -1418,6 +1422,42 @@ public readonly currentLsn: string;
 - *Type:* string
 
 Current LSN as of which DMS should start reading.
+
+---
+
+##### `keepCsvFiles`<sup>Optional</sup> <a name="keepCsvFiles" id="cdk-dms-replication.Db2Settings.property.keepCsvFiles"></a>
+
+```typescript
+public readonly keepCsvFiles: boolean;
+```
+
+- *Type:* boolean
+
+(Target) Whether DMS keeps the .csv files it used to load data, for troubleshooting.
+
+---
+
+##### `loadTimeout`<sup>Optional</sup> <a name="loadTimeout" id="cdk-dms-replication.Db2Settings.property.loadTimeout"></a>
+
+```typescript
+public readonly loadTimeout: number;
+```
+
+- *Type:* number
+
+(Target) Time in milliseconds DMS waits before timing out a data load.
+
+---
+
+##### `maxFileSize`<sup>Optional</sup> <a name="maxFileSize" id="cdk-dms-replication.Db2Settings.property.maxFileSize"></a>
+
+```typescript
+public readonly maxFileSize: number;
+```
+
+- *Type:* number
+
+(Target) Maximum size in KB of the .csv files DMS uses to load data.
 
 ---
 
@@ -1466,6 +1506,18 @@ public readonly setDataCaptureChanges: boolean;
 - *Type:* boolean
 
 Enables ongoing replication (CDC) for Db2.
+
+---
+
+##### `writeBufferSize`<sup>Optional</sup> <a name="writeBufferSize" id="cdk-dms-replication.Db2Settings.property.writeBufferSize"></a>
+
+```typescript
+public readonly writeBufferSize: number;
+```
+
+- *Type:* number
+
+(Target) Size in KB of the in-memory buffer DMS writes to before flushing to a .csv file.
 
 ---
 
@@ -1872,6 +1924,7 @@ const dmsMigrationPipelineProps: DmsMigrationPipelineProps = { ... }
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.cdcStartTime">cdcStartTime</a></code> | <code>string</code> | CDC start time (ISO-8601 string or Unix epoch seconds). |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.cdcStopPosition">cdcStopPosition</a></code> | <code>string</code> | CDC stop position. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.createDmsServiceRoles">createDmsServiceRoles</a></code> | <code>boolean</code> | Whether to create the two account-level DMS service roles (`dms-vpc-role` and `dms-cloudwatch-logs-role`) required by DMS. |
+| <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.dnsNameServers">dnsNameServers</a></code> | <code>string[]</code> | Custom DNS name servers for the replication instance, e.g. to resolve on-premises hostnames. Up to four IP addresses. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.enableCloudWatchLogs">enableCloudWatchLogs</a></code> | <code>boolean</code> | Whether to create a CloudWatch log group for the task. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.encryptionKey">encryptionKey</a></code> | <code>aws-cdk-lib.aws_kms.IKey</code> | KMS key for encrypting the replication instance storage at rest. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.engineVersion">engineVersion</a></code> | <code>string</code> | Engine version for the replication instance. |
@@ -1879,6 +1932,7 @@ const dmsMigrationPipelineProps: DmsMigrationPipelineProps = { ... }
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.existingTargetEndpoint">existingTargetEndpoint</a></code> | <code><a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a></code> | An existing {@link IDmsEndpoint} to use as the target. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.logRetention">logRetention</a></code> | <code>aws-cdk-lib.aws_logs.RetentionDays</code> | Retention period for the CloudWatch log group. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.multiAz">multiAz</a></code> | <code>boolean</code> | Whether the replication instance is Multi-AZ. |
+| <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.networkType">networkType</a></code> | <code><a href="#cdk-dms-replication.NetworkType">NetworkType</a></code> | IP addressing mode for the replication instance. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.removalPolicy">removalPolicy</a></code> | <code>aws-cdk-lib.RemovalPolicy</code> | Removal policy applied to all resources in the pipeline. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.replicationInstanceClass">replicationInstanceClass</a></code> | <code><a href="#cdk-dms-replication.ReplicationInstanceClass">ReplicationInstanceClass</a></code> | Replication instance class. |
 | <code><a href="#cdk-dms-replication.DmsMigrationPipelineProps.property.sourceEndpoint">sourceEndpoint</a></code> | <code><a href="#cdk-dms-replication.SourceEndpointOptions">SourceEndpointOptions</a></code> | Source endpoint configuration. |
@@ -1996,6 +2050,19 @@ will be `undefined`.
 
 ---
 
+##### `dnsNameServers`<sup>Optional</sup> <a name="dnsNameServers" id="cdk-dms-replication.DmsMigrationPipelineProps.property.dnsNameServers"></a>
+
+```typescript
+public readonly dnsNameServers: string[];
+```
+
+- *Type:* string[]
+- *Default:* the VPC's Amazon-provided DNS server
+
+Custom DNS name servers for the replication instance, e.g. to resolve on-premises hostnames. Up to four IP addresses.
+
+---
+
 ##### `enableCloudWatchLogs`<sup>Optional</sup> <a name="enableCloudWatchLogs" id="cdk-dms-replication.DmsMigrationPipelineProps.property.enableCloudWatchLogs"></a>
 
 ```typescript
@@ -2087,6 +2154,19 @@ public readonly multiAz: boolean;
 - *Default:* false
 
 Whether the replication instance is Multi-AZ.
+
+---
+
+##### `networkType`<sup>Optional</sup> <a name="networkType" id="cdk-dms-replication.DmsMigrationPipelineProps.property.networkType"></a>
+
+```typescript
+public readonly networkType: NetworkType;
+```
+
+- *Type:* <a href="#cdk-dms-replication.NetworkType">NetworkType</a>
+- *Default:* NetworkType.IPV4 (chosen by DMS)
+
+IP addressing mode for the replication instance.
 
 ---
 
@@ -2206,9 +2286,11 @@ const dmsReplicationInstanceProps: DmsReplicationInstanceProps = { ... }
 | <code><a href="#cdk-dms-replication.DmsReplicationInstanceProps.property.vpc">vpc</a></code> | <code>aws-cdk-lib.aws_ec2.IVpc</code> | VPC in which to place the replication instance. |
 | <code><a href="#cdk-dms-replication.DmsReplicationInstanceProps.property.allocatedStorage">allocatedStorage</a></code> | <code>number</code> | Allocated storage in GB. |
 | <code><a href="#cdk-dms-replication.DmsReplicationInstanceProps.property.autoMinorVersionUpgrade">autoMinorVersionUpgrade</a></code> | <code>boolean</code> | Whether to allow minor version upgrades to be applied automatically during maintenance. |
+| <code><a href="#cdk-dms-replication.DmsReplicationInstanceProps.property.dnsNameServers">dnsNameServers</a></code> | <code>string[]</code> | Custom DNS name servers for the replication instance, e.g. to resolve on-premises hostnames. Up to four IP addresses. |
 | <code><a href="#cdk-dms-replication.DmsReplicationInstanceProps.property.engineVersion">engineVersion</a></code> | <code>string</code> | Replication engine version. |
 | <code><a href="#cdk-dms-replication.DmsReplicationInstanceProps.property.kmsKey">kmsKey</a></code> | <code>aws-cdk-lib.aws_kms.IKey</code> | KMS key used to encrypt the replication instance storage at rest. |
 | <code><a href="#cdk-dms-replication.DmsReplicationInstanceProps.property.multiAz">multiAz</a></code> | <code>boolean</code> | Whether the replication instance is Multi-AZ. |
+| <code><a href="#cdk-dms-replication.DmsReplicationInstanceProps.property.networkType">networkType</a></code> | <code><a href="#cdk-dms-replication.NetworkType">NetworkType</a></code> | IP addressing mode for the replication instance. |
 | <code><a href="#cdk-dms-replication.DmsReplicationInstanceProps.property.preferredMaintenanceWindow">preferredMaintenanceWindow</a></code> | <code>string</code> | Preferred maintenance window, e.g. "sun:04:00-sun:04:30". |
 | <code><a href="#cdk-dms-replication.DmsReplicationInstanceProps.property.publiclyAccessible">publiclyAccessible</a></code> | <code>boolean</code> | Whether the replication instance is publicly accessible. |
 | <code><a href="#cdk-dms-replication.DmsReplicationInstanceProps.property.removalPolicy">removalPolicy</a></code> | <code>aws-cdk-lib.RemovalPolicy</code> | Removal policy applied to the replication instance. |
@@ -2259,6 +2341,19 @@ Whether to allow minor version upgrades to be applied automatically during maint
 
 ---
 
+##### `dnsNameServers`<sup>Optional</sup> <a name="dnsNameServers" id="cdk-dms-replication.DmsReplicationInstanceProps.property.dnsNameServers"></a>
+
+```typescript
+public readonly dnsNameServers: string[];
+```
+
+- *Type:* string[]
+- *Default:* the VPC's Amazon-provided DNS server
+
+Custom DNS name servers for the replication instance, e.g. to resolve on-premises hostnames. Up to four IP addresses.
+
+---
+
 ##### `engineVersion`<sup>Optional</sup> <a name="engineVersion" id="cdk-dms-replication.DmsReplicationInstanceProps.property.engineVersion"></a>
 
 ```typescript
@@ -2296,6 +2391,19 @@ public readonly multiAz: boolean;
 - *Default:* false
 
 Whether the replication instance is Multi-AZ.
+
+---
+
+##### `networkType`<sup>Optional</sup> <a name="networkType" id="cdk-dms-replication.DmsReplicationInstanceProps.property.networkType"></a>
+
+```typescript
+public readonly networkType: NetworkType;
+```
+
+- *Type:* <a href="#cdk-dms-replication.NetworkType">NetworkType</a>
+- *Default:* NetworkType.IPV4 (chosen by DMS)
+
+IP addressing mode for the replication instance.
 
 ---
 
@@ -2614,6 +2722,7 @@ const dmsServerlessPipelineProps: DmsServerlessPipelineProps = { ... }
 | <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.migrationType">migrationType</a></code> | <code><a href="#cdk-dms-replication.MigrationType">MigrationType</a></code> | The type of migration to perform. |
 | <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.vpc">vpc</a></code> | <code>aws-cdk-lib.aws_ec2.IVpc</code> | VPC in which to place the serverless replication config. |
 | <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.createDmsServiceRoles">createDmsServiceRoles</a></code> | <code>boolean</code> | Whether to create the two account-level DMS service roles (`dms-vpc-role` and `dms-cloudwatch-logs-role`) required by DMS. |
+| <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.dnsNameServers">dnsNameServers</a></code> | <code>string[]</code> | Custom DNS name servers for the serverless replication, e.g. to resolve on-premises hostnames. Up to four IP addresses. |
 | <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.enableCloudWatchLogs">enableCloudWatchLogs</a></code> | <code>boolean</code> | Whether to create a CloudWatch log group for the replication config. |
 | <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.existingSourceEndpoint">existingSourceEndpoint</a></code> | <code><a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a></code> | An existing {@link IDmsEndpoint} to use as the source. |
 | <code><a href="#cdk-dms-replication.DmsServerlessPipelineProps.property.existingTargetEndpoint">existingTargetEndpoint</a></code> | <code><a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a></code> | An existing {@link IDmsEndpoint} to use as the target. |
@@ -2696,6 +2805,19 @@ lifecycle-managed, create them in a dedicated stack and set this to
 When `false`, the construct expects the roles to already be present and
 skips creating them. The `dmsVpcRole` and `dmsCloudWatchRole` properties
 will be `undefined`.
+
+---
+
+##### `dnsNameServers`<sup>Optional</sup> <a name="dnsNameServers" id="cdk-dms-replication.DmsServerlessPipelineProps.property.dnsNameServers"></a>
+
+```typescript
+public readonly dnsNameServers: string[];
+```
+
+- *Type:* string[]
+- *Default:* the VPC's Amazon-provided DNS server
+
+Custom DNS name servers for the serverless replication, e.g. to resolve on-premises hostnames. Up to four IP addresses.
 
 ---
 
@@ -5473,6 +5595,7 @@ const s3Settings: S3Settings = { ... }
 | <code><a href="#cdk-dms-replication.S3Settings.property.bucketName">bucketName</a></code> | <code>string</code> | S3 bucket name. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.serviceAccessRoleArn">serviceAccessRoleArn</a></code> | <code>string</code> | IAM role ARN that DMS uses to access the S3 bucket. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.addColumnName">addColumnName</a></code> | <code>boolean</code> | Whether DMS adds a column name field to CSV output. |
+| <code><a href="#cdk-dms-replication.S3Settings.property.addTrailingPaddingCharacter">addTrailingPaddingCharacter</a></code> | <code>boolean</code> | Whether DMS pads string columns in CSV output to their declared length with trailing spaces. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.bucketFolder">bucketFolder</a></code> | <code>string</code> | Folder path prefix within the bucket. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.cdcInsertsAndUpdates">cdcInsertsAndUpdates</a></code> | <code>boolean</code> | Include CDC inserts and updates in the target. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.cdcInsertsOnly">cdcInsertsOnly</a></code> | <code>boolean</code> | Include only inserts (not updates or deletes) in the target. |
@@ -5491,7 +5614,9 @@ const s3Settings: S3Settings = { ... }
 | <code><a href="#cdk-dms-replication.S3Settings.property.enableStatistics">enableStatistics</a></code> | <code>boolean</code> | Whether to enable statistics for Parquet row groups. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.encodingType">encodingType</a></code> | <code><a href="#cdk-dms-replication.EncodingType">EncodingType</a></code> | Encoding type for Parquet. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.encryptionMode">encryptionMode</a></code> | <code><a href="#cdk-dms-replication.EncryptionMode">EncryptionMode</a></code> | Encryption mode for data at rest in S3. |
+| <code><a href="#cdk-dms-replication.S3Settings.property.expectedBucketOwner">expectedBucketOwner</a></code> | <code>string</code> | AWS account ID expected to own the bucket. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.externalTableDefinition">externalTableDefinition</a></code> | <code>string</code> | JSON structure defining external tables (for S3 source). |
+| <code><a href="#cdk-dms-replication.S3Settings.property.glueCatalogGeneration">glueCatalogGeneration</a></code> | <code>boolean</code> | Whether DMS generates an AWS Glue Data Catalog for the target data, so it can be queried with Athena. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.ignoreHeaderRows">ignoreHeaderRows</a></code> | <code>number</code> | Number of header rows to ignore in the S3 source. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.includeOpForFullLoad">includeOpForFullLoad</a></code> | <code>boolean</code> | Whether to include the operation column for full-load rows. |
 | <code><a href="#cdk-dms-replication.S3Settings.property.maxFileSize">maxFileSize</a></code> | <code>number</code> | Maximum file size (in KB) for data files. |
@@ -5540,6 +5665,18 @@ public readonly addColumnName: boolean;
 - *Type:* boolean
 
 Whether DMS adds a column name field to CSV output.
+
+---
+
+##### `addTrailingPaddingCharacter`<sup>Optional</sup> <a name="addTrailingPaddingCharacter" id="cdk-dms-replication.S3Settings.property.addTrailingPaddingCharacter"></a>
+
+```typescript
+public readonly addTrailingPaddingCharacter: boolean;
+```
+
+- *Type:* boolean
+
+Whether DMS pads string columns in CSV output to their declared length with trailing spaces.
 
 ---
 
@@ -5763,6 +5900,22 @@ Encryption mode for data at rest in S3.
 
 ---
 
+##### `expectedBucketOwner`<sup>Optional</sup> <a name="expectedBucketOwner" id="cdk-dms-replication.S3Settings.property.expectedBucketOwner"></a>
+
+```typescript
+public readonly expectedBucketOwner: string;
+```
+
+- *Type:* string
+- *Default:* bucket ownership is not checked
+
+AWS account ID expected to own the bucket.
+
+DMS fails rather than read
+from or write to a bucket owned by any other account.
+
+---
+
 ##### `externalTableDefinition`<sup>Optional</sup> <a name="externalTableDefinition" id="cdk-dms-replication.S3Settings.property.externalTableDefinition"></a>
 
 ```typescript
@@ -5772,6 +5925,18 @@ public readonly externalTableDefinition: string;
 - *Type:* string
 
 JSON structure defining external tables (for S3 source).
+
+---
+
+##### `glueCatalogGeneration`<sup>Optional</sup> <a name="glueCatalogGeneration" id="cdk-dms-replication.S3Settings.property.glueCatalogGeneration"></a>
+
+```typescript
+public readonly glueCatalogGeneration: boolean;
+```
+
+- *Type:* boolean
+
+Whether DMS generates an AWS Glue Data Catalog for the target data, so it can be queried with Athena.
 
 ---
 
@@ -8317,6 +8482,35 @@ Target DB type for MySQL target endpoints.
 
 
 ##### `MULTIPLE_DATABASES` <a name="MULTIPLE_DATABASES" id="cdk-dms-replication.MySqlTargetDbType.MULTIPLE_DATABASES"></a>
+
+---
+
+
+### NetworkType <a name="NetworkType" id="cdk-dms-replication.NetworkType"></a>
+
+IP addressing mode for a replication instance.
+
+#### Members <a name="Members" id="Members"></a>
+
+| **Name** | **Description** |
+| --- | --- |
+| <code><a href="#cdk-dms-replication.NetworkType.IPV4">IPV4</a></code> | IPv4 only. |
+| <code><a href="#cdk-dms-replication.NetworkType.DUAL">DUAL</a></code> | Dual-stack: IPv4 and IPv6. |
+
+---
+
+##### `IPV4` <a name="IPV4" id="cdk-dms-replication.NetworkType.IPV4"></a>
+
+IPv4 only.
+
+---
+
+
+##### `DUAL` <a name="DUAL" id="cdk-dms-replication.NetworkType.DUAL"></a>
+
+Dual-stack: IPv4 and IPv6.
+
+Requires subnets with IPv6 CIDR blocks.
 
 ---
 

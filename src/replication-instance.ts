@@ -3,7 +3,7 @@ import * as dms from 'aws-cdk-lib/aws-dms';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as kms from 'aws-cdk-lib/aws-kms';
 import { Construct } from 'constructs';
-import { ReplicationInstanceClass } from './enums';
+import { NetworkType, ReplicationInstanceClass } from './enums';
 
 /** Props for {@link DmsReplicationInstance}. */
 export interface DmsReplicationInstanceProps {
@@ -55,6 +55,19 @@ export interface DmsReplicationInstanceProps {
    * @default false
    */
   readonly publiclyAccessible?: boolean;
+
+  /**
+   * IP addressing mode for the replication instance.
+   * @default NetworkType.IPV4 (chosen by DMS)
+   */
+  readonly networkType?: NetworkType;
+
+  /**
+   * Custom DNS name servers for the replication instance, e.g. to resolve
+   * on-premises hostnames. Up to four IP addresses.
+   * @default the VPC's Amazon-provided DNS server
+   */
+  readonly dnsNameServers?: string[];
 
   /**
    * Whether to allow minor version upgrades to be applied automatically during maintenance.
@@ -169,6 +182,8 @@ export class DmsReplicationInstance extends Construct {
       kmsKeyId: this.encryptionKey.keyArn,
       multiAz: props.multiAz ?? false,
       publiclyAccessible: props.publiclyAccessible ?? false,
+      networkType: props.networkType,
+      dnsNameServers: props.dnsNameServers?.join(','),
       autoMinorVersionUpgrade: props.autoMinorVersionUpgrade ?? true,
       replicationSubnetGroupIdentifier: this.subnetGroup.ref,
       vpcSecurityGroupIds: securityGroupIds,

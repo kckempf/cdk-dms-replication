@@ -73,6 +73,7 @@ export {
   MongoAuthType,
   MongoNestingLevel,
   MySqlTargetDbType,
+  NetworkType,
   OracleCdcPlugin,
   OracleNumberDatatypeScale,
   ParquetVersion,

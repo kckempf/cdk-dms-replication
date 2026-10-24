@@ -141,6 +141,17 @@ describe('DmsServerlessPipeline', () => {
     });
   });
 
+  test('passes custom DNS name servers', () => {
+    const { stack, vpc } = makeStack();
+    new DmsServerlessPipeline(stack, 'SL', {
+      ...minProps(vpc),
+      dnsNameServers: ['10.0.0.2', '10.0.0.3'],
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::ReplicationConfig', {
+      ComputeConfig: { DnsNameServers: '10.0.0.2,10.0.0.3' },
+    });
+  });
+
   test('uses existing source endpoint', () => {
     const { stack, vpc } = makeStack();
     const existingSource = {

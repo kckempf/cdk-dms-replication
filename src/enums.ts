@@ -126,6 +126,16 @@ export enum ReplicationInstanceClass {
 }
 
 /**
+ * IP addressing mode for a replication instance.
+ */
+export enum NetworkType {
+  /** IPv4 only. */
+  IPV4 = 'IPV4',
+  /** Dual-stack: IPv4 and IPv6. Requires subnets with IPv6 CIDR blocks. */
+  DUAL = 'DUAL',
+}
+
+/**
  * Encryption mode used when writing data to an S3 bucket or Redshift cluster.
  */
 export enum EncryptionMode {

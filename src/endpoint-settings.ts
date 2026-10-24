@@ -202,6 +202,14 @@ export interface Db2Settings {
   readonly setDataCaptureChanges?: boolean;
   /** Current LSN as of which DMS should start reading. */
   readonly currentLsn?: string;
+  /** (Target) Whether DMS keeps the .csv files it used to load data, for troubleshooting. */
+  readonly keepCsvFiles?: boolean;
+  /** (Target) Time in milliseconds DMS waits before timing out a data load. */
+  readonly loadTimeout?: number;
+  /** (Target) Maximum size in KB of the .csv files DMS uses to load data. */
+  readonly maxFileSize?: number;
+  /** (Target) Size in KB of the in-memory buffer DMS writes to before flushing to a .csv file. */
+  readonly writeBufferSize?: number;
   /** ARN of IAM role for Secrets Manager. */
   readonly secretsManagerAccessRoleArn?: string;
   /** Full ARN or name of the Secrets Manager secret. */
@@ -244,8 +252,18 @@ export interface S3Settings {
   readonly bucketFolder?: string;
   /** IAM role ARN that DMS uses to access the S3 bucket. */
   readonly serviceAccessRoleArn: string;
+  /**
+   * AWS account ID expected to own the bucket. DMS fails rather than read
+   * from or write to a bucket owned by any other account.
+   * @default - bucket ownership is not checked
+   */
+  readonly expectedBucketOwner?: string;
   /** Whether DMS adds a column name field to CSV output. */
   readonly addColumnName?: boolean;
+  /** Whether DMS pads string columns in CSV output to their declared length with trailing spaces. */
+  readonly addTrailingPaddingCharacter?: boolean;
+  /** Whether DMS generates an AWS Glue Data Catalog for the target data, so it can be queried with Athena. */
+  readonly glueCatalogGeneration?: boolean;
   /** Include CDC inserts and updates in the target. */
   readonly cdcInsertsAndUpdates?: boolean;
   /** Include only inserts (not updates or deletes) in the target. */

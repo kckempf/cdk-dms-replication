@@ -17,6 +17,7 @@ import {
   MongoAuthMechanism,
   MongoAuthType,
   MongoNestingLevel,
+  NetworkType,
   PostgresCdcPlugin,
   ReplicationInstanceClass,
   S3DataFormat,
@@ -99,6 +100,19 @@ describe('DmsReplicationInstance', () => {
     });
   });
 
+  test('supports dual-stack networking and custom DNS servers', () => {
+    const { stack, vpc } = makeStack();
+    new DmsReplicationInstance(stack, 'RI', {
+      vpc,
+      networkType: NetworkType.DUAL,
+      dnsNameServers: ['10.0.0.2', '10.0.0.3'],
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::ReplicationInstance', {
+      NetworkType: 'DUAL',
+      DnsNameServers: '10.0.0.2,10.0.0.3',
+    });
+  });
+
   test('allowInboundFrom adds an ingress rule to the security group', () => {
     const { stack, vpc } = makeStack();
     const ri = new DmsReplicationInstance(stack, 'RI', { vpc });
@@ -161,6 +175,53 @@ describe('DmsEndpoint', () => {
     Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
       EndpointType: 'target',
       EngineName: 's3',
+    });
+  });
+
+  test('passes S3 bucket-owner and Glue catalog settings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.TARGET,
+      engine: EndpointEngine.S3,
+      s3Settings: {
+        bucketName: 'my-migration-bucket',
+        serviceAccessRoleArn: 'arn:aws:iam::123456789012:role/dms-s3-role',
+        expectedBucketOwner: '123456789012',
+        glueCatalogGeneration: true,
+        addTrailingPaddingCharacter: true,
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      S3Settings: Match.objectLike({
+        ExpectedBucketOwner: '123456789012',
+        GlueCatalogGeneration: true,
+        AddTrailingPaddingCharacter: true,
+      }),
+    });
+  });
+
+  test('passes Db2 target load settings', () => {
+    const { stack } = makeStack();
+    new DmsEndpoint(stack, 'Ep', {
+      endpointType: EndpointType.TARGET,
+      engine: EndpointEngine.IBM_DB2,
+      serverName: 'db2.example.com',
+      port: 50000,
+      databaseName: 'mydb',
+      db2Settings: {
+        keepCsvFiles: true,
+        loadTimeout: 1200,
+        maxFileSize: 1024,
+        writeBufferSize: 2048,
+      },
+    });
+    Template.fromStack(stack).hasResourceProperties('AWS::DMS::Endpoint', {
+      IbmDb2Settings: Match.objectLike({
+        KeepCsvFiles: true,
+        LoadTimeout: 1200,
+        MaxFileSize: 1024,
+        WriteBufferSize: 2048,
+      }),
     });
   });
 

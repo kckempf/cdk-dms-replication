@@ -5,7 +5,7 @@ import * as logs from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import { ensureDmsCloudWatchRole, ensureDmsVpcRole } from './dms-roles';
 import { DmsEndpoint, DmsEndpointProps, IDmsEndpoint } from './endpoint';
-import { EndpointType, MigrationType, ReplicationInstanceClass } from './enums';
+import { EndpointType, MigrationType, NetworkType, ReplicationInstanceClass } from './enums';
 import { DmsReplicationInstance } from './replication-instance';
 import { DmsReplicationTask } from './replication-task';
 import { TableMappings } from './table-mappings';
@@ -117,6 +117,19 @@ export interface DmsMigrationPipelineProps {
    * @default false
    */
   readonly multiAz?: boolean;
+
+  /**
+   * IP addressing mode for the replication instance.
+   * @default NetworkType.IPV4 (chosen by DMS)
+   */
+  readonly networkType?: NetworkType;
+
+  /**
+   * Custom DNS name servers for the replication instance, e.g. to resolve
+   * on-premises hostnames. Up to four IP addresses.
+   * @default the VPC's Amazon-provided DNS server
+   */
+  readonly dnsNameServers?: string[];
 
   /**
    * Engine version for the replication instance.
@@ -368,6 +381,8 @@ export class DmsMigrationPipeline extends Construct {
       replicationInstanceClass: props.replicationInstanceClass,
       allocatedStorage: props.allocatedStorage,
       multiAz: props.multiAz,
+      networkType: props.networkType,
+      dnsNameServers: props.dnsNameServers,
       engineVersion: props.engineVersion,
       kmsKey: props.encryptionKey,
       removalPolicy,

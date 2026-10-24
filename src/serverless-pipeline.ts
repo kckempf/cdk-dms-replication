@@ -68,6 +68,13 @@ export interface DmsServerlessPipelineProps {
   readonly multiAz?: boolean;
 
   /**
+   * Custom DNS name servers for the serverless replication, e.g. to resolve
+   * on-premises hostnames. Up to four IP addresses.
+   * @default the VPC's Amazon-provided DNS server
+   */
+  readonly dnsNameServers?: string[];
+
+  /**
    * Preferred maintenance window, e.g. "sun:04:00-sun:04:30".
    */
   readonly preferredMaintenanceWindow?: string;
@@ -452,6 +459,7 @@ export class DmsServerlessPipeline extends Construct {
         maxCapacityUnits: props.maxCapacityUnits,
         minCapacityUnits: props.minCapacityUnits,
         multiAz: props.multiAz ?? false,
+        dnsNameServers: props.dnsNameServers?.join(','),
         kmsKeyId: this.encryptionKey.keyArn,
         replicationSubnetGroupId: this.subnetGroup.ref,
         vpcSecurityGroupIds: securityGroupIds,

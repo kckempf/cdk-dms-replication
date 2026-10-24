@@ -228,7 +228,7 @@
           "exec": "npx cdk synth --app \"npx ts-node --project tsconfig.json integ/sample-app.ts\" --output integ/cdk.out --quiet"
         },
         {
-          "exec": "cfn-lint integ/cdk.out/*.template.json"
+          "exec": "cfn-lint --ignore-checks W3005 -- integ/cdk.out/*.template.json"
         }
       ]
     },
