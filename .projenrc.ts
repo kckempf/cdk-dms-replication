@@ -41,6 +41,9 @@ const project = new awscdk.AwsCdkConstructLibrary({
   publishToNuget: {
     dotNetNamespace: 'KcKempf.CdkDmsReplication',
     packageId: 'KcKempf.CdkDmsReplication',
+    // OIDC trusted publishing instead of a long-lived API key. Secret
+    // NUGET_USERNAME holds the nuget.org profile name (not email).
+    trustedPublishing: true,
   },
 
   publishToGo: {
