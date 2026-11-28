@@ -4,7 +4,7 @@
 
 ### DmsEndpoint <a name="DmsEndpoint" id="cdk-dms-replication.DmsEndpoint"></a>
 
-- *Implements:* <a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a>
+- *Implements:* constructs.IConstruct, constructs.IDependable, <a href="#cdk-dms-replication.IDmsEndpoint">IDmsEndpoint</a>
 
 A DMS endpoint construct supporting every engine that DMS supports.
 
@@ -188,6 +188,8 @@ ARN of the DMS endpoint.
 
 
 ### DmsMigrationPipeline <a name="DmsMigrationPipeline" id="cdk-dms-replication.DmsMigrationPipeline"></a>
+
+- *Implements:* constructs.IConstruct, constructs.IDependable
 
 An L3 CDK pattern construct that provisions a complete DMS migration pipeline:.
 
@@ -458,6 +460,8 @@ CloudWatch log group for the task (if enableCloudWatchLogs is true).
 
 ### DmsReplicationInstance <a name="DmsReplicationInstance" id="cdk-dms-replication.DmsReplicationInstance"></a>
 
+- *Implements:* constructs.IConstruct, constructs.IDependable
+
 An L2-style construct that provisions a DMS replication instance with: - Private subnet placement via a dedicated subnet group - KMS encryption at rest (key created if not provided) - A dedicated security group (created if not provided).
 
 #### Initializers <a name="Initializers" id="cdk-dms-replication.DmsReplicationInstance.Initializer"></a>
@@ -689,6 +693,8 @@ The replication subnet group created for this instance.
 
 ### DmsReplicationTask <a name="DmsReplicationTask" id="cdk-dms-replication.DmsReplicationTask"></a>
 
+- *Implements:* constructs.IConstruct, constructs.IDependable
+
 A DMS replication task that ties a replication instance to a source and target endpoint and defines what data to migrate and how.
 
 #### Initializers <a name="Initializers" id="cdk-dms-replication.DmsReplicationTask.Initializer"></a>
@@ -851,6 +857,8 @@ ARN of the replication task.
 
 
 ### DmsServerlessPipeline <a name="DmsServerlessPipeline" id="cdk-dms-replication.DmsServerlessPipeline"></a>
+
+- *Implements:* constructs.IConstruct, constructs.IDependable
 
 An L3 CDK pattern construct that provisions a DMS Serverless replication pipeline:.
 
